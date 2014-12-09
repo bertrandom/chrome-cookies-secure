@@ -1,0 +1,18 @@
+{
+  "name": "chrome-cookie-extract",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "keytar": "^2.0.3",
+    "request": "^2.49.0",
+    "sqlite3": "^3.0.4",
+    "tldjs": "^1.5.1",
+    "tough-cookie": "0.12.1"
+  }
+}
