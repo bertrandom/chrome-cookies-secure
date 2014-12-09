@@ -1,4 +1,4 @@
-var chrome = require('../chrome');
+var chrome = require('../index');
 
 chrome.getCookies('http://smarf.toomanycooks.kitchen', function(err, cookies) {
 
