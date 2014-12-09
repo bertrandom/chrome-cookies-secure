@@ -9,10 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "int": "^0.2.0",
     "keytar": "^2.0.3",
     "request": "^2.49.0",
     "sqlite3": "^3.0.4",
     "tldjs": "^1.5.1",
-    "tough-cookie": "0.12.1"
+    "tough-cookie": "^0.12.1"
   }
 }
