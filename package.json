@@ -1,13 +1,13 @@
 {
   "name": "chrome-cookies-secure",
   "version": "1.0.0",
-  "description": "",
+  "description": "Extract encrypted cookies from Google Chrome on a Mac",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Bertrand Fan <bertrand@fan.net>",
+  "license": "MIT",
   "dependencies": {
     "int": "^0.2.0",
     "keytar": "^2.0.3",
