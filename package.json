@@ -2,12 +2,14 @@
   "name": "chrome-cookies-secure",
   "version": "1.0.0",
   "description": "Extract encrypted Google Chrome cookies for a url on a Mac",
+  "keywords": "google chrome cookies encrypted curl decrypt encrypt extract",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Bertrand Fan <bertrand@fan.net>",
+  "author": "Bertrand Fan <bertrand@fan.net> (http://thatsaspicymeatball.com/)",
   "license": "MIT",
+  "os": [ "darwin" ],
   "dependencies": {
     "int": "^0.2.0",
     "keytar": "^2.0.3",
