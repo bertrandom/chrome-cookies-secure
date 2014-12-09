@@ -10,6 +10,10 @@
   "author": "Bertrand Fan <bertrand@fan.net> (http://thatsaspicymeatball.com/)",
   "license": "MIT",
   "os": [ "darwin" ],
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/bertrandom/chrome-cookies-secure.git"
+  },
   "dependencies": {
     "int": "^0.2.0",
     "keytar": "^2.0.3",
