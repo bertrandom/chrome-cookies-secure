@@ -1,8 +1,8 @@
 {
   "name": "chrome-cookies-secure",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Extract encrypted Google Chrome cookies for a url on a Mac",
-  "keywords": "google chrome cookies encrypted curl decrypt encrypt extract",
+  "keywords": ["google","chrome","cookies","encrypted","curl","decrypt","encrypt","extract"],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
