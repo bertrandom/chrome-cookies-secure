@@ -54,8 +54,8 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 	var out = '',
 		cookieLength = cookies.length;
 
-	cookies.forEach(function(cookie, index) {
-		
+	cookies.forEach(function (cookie, index) {
+
 		out += cookie.host_key + '\t';
 		out += ((cookie.host_key === '.' + domain) ? 'TRUE' : 'FALSE') + '\t';
 		out += cookie.path + '\t';
@@ -85,8 +85,8 @@ function convertRawToHeader(cookies) {
 	var out = '',
 		cookieLength = cookies.length;
 
-	cookies.forEach(function(cookie, index) {
-		
+	cookies.forEach(function (cookie, index) {
+
 		out += cookie.name + '=' + cookie.value;
 		if (cookieLength > index + 1) {
 			out += '; ';
@@ -102,8 +102,8 @@ function convertRawToJar(cookies, uri) {
 
 	var jar = new request.jar();
 
-	cookies.forEach(function(cookie, index) {
-		
+	cookies.forEach(function (cookie, index) {
+
 		var jarCookie = request.cookie(cookie.name + '=' + cookie.value);
 		jar.setCookie(jarCookie, uri);
 
@@ -149,7 +149,7 @@ function convertRawToObject(cookies) {
 
 	var out = {};
 
-	cookies.forEach(function(cookie, index) {
+	cookies.forEach(function (cookie, index) {
 		out[cookie.name] = cookie.value;
 	});
 
@@ -167,7 +167,7 @@ function convertRawToObject(cookies) {
 	object - key/value of name/value pairs, overlapping names are overwritten
 
  */
-var getCookies = function(uri, format, callback) {
+var getCookies = function (uri, format, callback) {
 
 	if (format instanceof Function) {
 		callback = format;
@@ -225,7 +225,7 @@ var getCookies = function(uri, format, callback) {
 					validCookies = [],
 					output;
 
-				cookies.forEach(function(cookie) {
+				cookies.forEach(function (cookie) {
 
 					if (cookie.secure && !isSecure) {
 						return;
@@ -258,7 +258,7 @@ var getCookies = function(uri, format, callback) {
 						break;
 
 					case 'header':
-						output = convertRawToHeader(validCookies);						
+						output = convertRawToHeader(validCookies);
 						break;
 
 					case 'object':
