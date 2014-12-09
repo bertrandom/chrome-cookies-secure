@@ -157,6 +157,16 @@ function convertRawToObject(cookies) {
 
 }
 
+/*
+
+	Possible formats:
+	curl - Netscape HTTP Cookie File contents usable by curl and wget http://curl.haxx.se/docs/http-cookies.html
+	jar - request module compatible jar https://github.com/request/request#requestjar
+	set-cookie - Array of set-cookie strings
+	header - "cookie" header string
+	object - key/value of name/value pairs, overlapping names are overwritten
+
+ */
 var getCookies = function(uri, format, callback) {
 
 	if (format instanceof Function) {
@@ -186,6 +196,9 @@ var getCookies = function(uri, format, callback) {
 				return callback(new Error('Could not parse domain from URI, format should be http://www.example.com/path/'));
 			}
 
+			// ORDER BY tries to match sort order specified in
+			// RFC 6265 - Section 5.4, step 2
+			// http://tools.ietf.org/html/rfc6265#section-5.4
 			db.each("SELECT host_key, path, secure, expires_utc, name, value, encrypted_value, creation_utc, httponly, has_expires, persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC", function (err, cookie) {
 
 				var encryptedValue,
