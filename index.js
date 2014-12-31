@@ -1,5 +1,4 @@
-var keytar = require('keytar'),
-	sqlite3 = require('sqlite3'),
+var sqlite3 = require('sqlite3'),
 	tld = require('tldjs'),
 	tough = require('tough-cookie'),
 	request = require('request'),
@@ -7,11 +6,29 @@ var keytar = require('keytar'),
 	url = require('url'),
 	crypto = require('crypto'),
 	Cookie = tough.Cookie,
-	path = process.env.HOME + '/Library/Application Support/Google/Chrome/Default/Cookies',
-	db = new sqlite3.Database(path),
-	KEYLENGTH = 16,
-	SALT = 'saltysalt',
+	path,
+	ITERATIONS;
+
+if (process.platform === 'darwin') {
+
+	path = process.env.HOME + '/Library/Application Support/Google/Chrome/Default/Cookies';
 	ITERATIONS = 1003;
+
+} else if (process.platform === 'linux') {
+
+	path = process.env.HOME + '/.config/google-chrome/Default/Cookies';
+	ITERATIONS = 1;
+
+} else {
+
+	console.error('Only Mac and Linux are supported.');
+	process.exit();
+
+}
+
+var	KEYLENGTH = 16,
+	SALT = 'saltysalt',
+	db = new sqlite3.Database(path);
 
 // Decryption based on http://n8henrie.com/2014/05/decrypt-chrome-cookies-with-python/
 // Inspired by https://www.npmjs.org/package/chrome-cookies
@@ -33,7 +50,19 @@ function decrypt(key, encryptedData) {
 
 function getDerivedKey(callback) {
 
-	var chromePassword = keytar.getPassword('Chrome Safe Storage', 'Chrome');
+	var keytar,
+		chromePassword;
+
+	if (process.platform === 'darwin') {
+
+		keytar = require('keytar');
+		chromePassword = keytar.getPassword('Chrome Safe Storage', 'Chrome');
+
+	} else if (process.platform === 'linux') {
+
+		chromePassword = 'peanuts';
+
+	}
 
 	crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, callback);
 

@@ -1,7 +1,7 @@
 {
   "name": "chrome-cookies-secure",
-  "version": "1.0.1",
-  "description": "Extract encrypted Google Chrome cookies for a url on a Mac",
+  "version": "1.0.2",
+  "description": "Extract encrypted Google Chrome cookies for a url on a Mac or Linux",
   "keywords": ["google","chrome","cookies","encrypted","curl","decrypt","encrypt","extract"],
   "main": "index.js",
   "scripts": {
@@ -9,17 +9,19 @@
   },
   "author": "Bertrand Fan <bertrand@fan.net> (http://thatsaspicymeatball.com/)",
   "license": "MIT",
-  "os": [ "darwin" ],
+  "os": [ "darwin", "linux" ],
   "repository": {
     "type" : "git",
     "url" : "https://github.com/bertrandom/chrome-cookies-secure.git"
   },
   "dependencies": {
     "int": "^0.2.0",
-    "keytar": "^2.0.3",
     "request": "^2.49.0",
     "sqlite3": "^3.0.4",
     "tldjs": "^1.5.1",
     "tough-cookie": "^0.12.1"
+  },
+  "optionalDependencies": {
+    "keytar": "^2.0.3"
   }
 }
