@@ -1,6 +1,6 @@
 # chrome-cookies-secure
 
-Extract encrypted Google Chrome cookies for a url on a Mac
+Extract encrypted Google Chrome cookies for a url on Mac OS X or Linux
 
 ## Installation
 
@@ -58,7 +58,7 @@ chrome.getCookies('http://www.example.com/', 'jar', function(err, jar) {
 
 ## Limitations
 
-This modules requires Keychain Access to read the Google Chrome encryption key. The first time you use it, it will popup this dialog:
+On OS X, this module requires Keychain Access to read the Google Chrome encryption key. The first time you use it, it will popup this dialog:
 
 ![image](https://raw.githubusercontent.com/bertrandom/chrome-cookies-secure/gh-pages/access.png)
 
