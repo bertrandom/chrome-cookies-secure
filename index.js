@@ -37,12 +37,26 @@ function decrypt(key, encryptedData) {
 
 	var decipher,
 		decoded,
+		final,
+		padding,
 		iv = new Buffer(new Array(KEYLENGTH + 1).join(' '), 'binary');
 
 	decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
+	decipher.setAutoPadding(false);
+
 	encryptedData = encryptedData.slice(3);
+
 	decoded = decipher.update(encryptedData);
-	decoded += decipher.final();
+
+	final = decipher.final();
+	final.copy(decoded, decoded.length - 1);
+
+	padding = decoded[decoded.length - 1];
+	if (padding) {
+		decoded = decoded.slice(0, decoded.length - padding);
+	}
+
+	decoded = decoded.toString('utf8');
 
 	return decoded;
 
