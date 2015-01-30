@@ -7,7 +7,8 @@ var sqlite3 = require('sqlite3'),
 	crypto = require('crypto'),
 	Cookie = tough.Cookie,
 	path,
-	ITERATIONS;
+	ITERATIONS,
+	dbClosed = false;
 
 if (process.platform === 'darwin') {
 
@@ -223,6 +224,11 @@ var getCookies = function (uri, format, callback) {
 		return callback(new Error('Could not parse URI, format should be http://www.example.com/path/'));
 	}
 
+	if (dbClosed) {
+		db = new sqlite3.Database(path);
+		dbClosed = false;
+	}
+
 	getDerivedKey(function (err, derivedKey) {
 
 		if (err) {
@@ -312,13 +318,16 @@ var getCookies = function (uri, format, callback) {
 
 				}
 
-				return callback(null, output);
+				db.close(function(err) {
+					if (!err) {
+						dbClosed = true;						
+					}
+					return callback(null, output);					
+				});
 
 			});
 
 		});
-
-		db.close();
 
 	});
 
