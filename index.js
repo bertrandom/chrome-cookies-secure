@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2015, Yahoo! Inc.  All rights reserved.
+ * Copyrights licensed under the MIT License.
+ * See the accompanying LICENSE file for terms.
+ */
+
 var sqlite3 = require('sqlite3'),
 	tld = require('tldjs'),
 	tough = require('tough-cookie'),
