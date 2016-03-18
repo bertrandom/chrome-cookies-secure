@@ -11,14 +11,17 @@ var sqlite3 = require('sqlite3'),
 	int = require('int'),
 	url = require('url'),
 	crypto = require('crypto'),
+	fs = require('fs'),
 	Cookie = tough.Cookie,
 	path,
 	ITERATIONS,
 	dbClosed = false;
 
 if (process.platform === 'darwin') {
+	var localState = JSON.parse(fs.readFileSync(process.env.HOME + '/Library/Application Support/Google/Chrome/Local State'));
 
-	path = process.env.HOME + '/Library/Application Support/Google/Chrome/Default/Cookies';
+	var lastUsed = localState.profile.last_used;
+	path = process.env.HOME + '/Library/Application Support/Google/Chrome/' + lastUsed + '/Cookies';
 	ITERATIONS = 1003;
 
 } else if (process.platform === 'linux') {
@@ -171,7 +174,7 @@ function convertRawToSetCookieStrings(cookies) {
 	cookies.forEach(function(cookie, index) {
 
 		var out = '';
-		
+
 		var dateExpires = new Date(convertChromiumTimestampToUnix(cookie.expires_utc) * 1000);
 
 		out += cookie.name + '=' + cookie.value + '; ';
@@ -326,9 +329,9 @@ var getCookies = function (uri, format, callback) {
 
 				db.close(function(err) {
 					if (!err) {
-						dbClosed = true;						
+						dbClosed = true;
 					}
-					return callback(null, output);					
+					return callback(null, output);
 				});
 
 			});
