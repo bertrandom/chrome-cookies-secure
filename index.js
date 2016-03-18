@@ -34,8 +34,9 @@ if (process.platform === 'darwin') {
 }
 
 var localState = JSON.parse(fs.readFileSync(userData + '/Local State')),
-	lastUsed = localState.profile.last_used,
-	path = userData + '/' + lastUsed + '/Cookies';
+	lastUsed = localState.profile.last_used;
+
+path = userData + '/' + lastUsed + '/Cookies';
 
 var	KEYLENGTH = 16,
 	SALT = 'saltysalt',
