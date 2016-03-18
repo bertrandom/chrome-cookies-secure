@@ -13,20 +13,17 @@ var sqlite3 = require('sqlite3'),
 	crypto = require('crypto'),
 	fs = require('fs'),
 	Cookie = tough.Cookie,
+	userData,
 	path,
 	ITERATIONS,
 	dbClosed = false;
 
 if (process.platform === 'darwin') {
-	var localState = JSON.parse(fs.readFileSync(process.env.HOME + '/Library/Application Support/Google/Chrome/Local State'));
-
-	var lastUsed = localState.profile.last_used;
-	path = process.env.HOME + '/Library/Application Support/Google/Chrome/' + lastUsed + '/Cookies';
+	userData = process.env.HOME + '/Library/Application Support/Google/Chrome';
 	ITERATIONS = 1003;
 
 } else if (process.platform === 'linux') {
-
-	path = process.env.HOME + '/.config/google-chrome/Default/Cookies';
+	userData = process.env.HOME + '/.config/google-chrome';
 	ITERATIONS = 1;
 
 } else {
@@ -35,6 +32,10 @@ if (process.platform === 'darwin') {
 	process.exit();
 
 }
+
+var localState = JSON.parse(fs.readFileSync(userData + '/Local State')),
+	lastUsed = localState.profile.last_used,
+	path = userData + '/' + lastUsed + '/Cookies';
 
 var	KEYLENGTH = 16,
 	SALT = 'saltysalt',
