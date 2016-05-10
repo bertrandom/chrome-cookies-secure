@@ -155,7 +155,9 @@ function convertRawToJar(cookies, uri) {
 	cookies.forEach(function (cookie, index) {
 
 		var jarCookie = request.cookie(cookie.name + '=' + cookie.value);
-		jar.setCookie(jarCookie, uri);
+		if (jarCookie) {
+			jar.setCookie(jarCookie, uri);			
+		}
 
 	});
 
@@ -297,6 +299,20 @@ var getCookies = function (uri, format, callback) {
 					validCookies.push(cookie);
 
 				});
+
+				var filteredCookies = [];
+				var keys = {};
+
+				validCookies.reverse().forEach(function (cookie) {
+
+					if (typeof keys[cookie.name] === 'undefined') {
+						filteredCookies.push(cookie);
+						keys[cookie.name] = true;
+					}
+
+				});
+
+				validCookies = filteredCookies.reverse();
 
 				switch (format) {
 
