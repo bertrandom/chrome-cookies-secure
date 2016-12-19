@@ -14,6 +14,7 @@ var sqlite3 = require('sqlite3'),
 	Cookie = tough.Cookie,
 	path,
 	ITERATIONS,
+	DIGEST = 'SHA1',
 	dbClosed = false;
 
 if (process.platform === 'darwin') {
@@ -85,7 +86,7 @@ function getDerivedKey(callback) {
 
 	}
 
-	crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, callback);
+	crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, DIGEST, callback);
 
 }
 
