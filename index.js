@@ -85,7 +85,7 @@ function getDerivedKey(callback) {
 
 	}
 
-	crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, callback);
+	crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
 
 }
 
