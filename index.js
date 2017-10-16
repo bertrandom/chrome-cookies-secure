@@ -14,6 +14,7 @@ var sqlite3 = require('sqlite3'),
 	Cookie = tough.Cookie,
 	path,
 	ITERATIONS,
+	DIGEST = 'SHA1',
 	dbClosed = false;
 
 if (process.platform === 'darwin') {
@@ -265,7 +266,7 @@ var getCookies = function (uri, format, callback) {
 					return callback(err);
 				}
 
-				if (cookie.value === '') {
+				if (cookie.value === '' && cookie.encrypted_value.length > 0) {
 					encryptedValue = cookie.encrypted_value;
 					cookie.value = decrypt(derivedKey, encryptedValue);
 					delete cookie.encrypted_value;
