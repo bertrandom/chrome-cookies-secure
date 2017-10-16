@@ -14,7 +14,6 @@ var sqlite3 = require('sqlite3'),
 	Cookie = tough.Cookie,
 	path,
 	ITERATIONS,
-	DIGEST = 'SHA1',
 	dbClosed = false;
 
 if (process.platform === 'darwin') {
