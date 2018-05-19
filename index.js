@@ -77,15 +77,16 @@ function getDerivedKey(callback) {
 	if (process.platform === 'darwin') {
 
 		keytar = require('keytar');
-		chromePassword = keytar.getPassword('Chrome Safe Storage', 'Chrome');
+		keytar.getPassword('Chrome Safe Storage', 'Chrome').then(function(chromePassword) {
+			crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
+		});
 
 	} else if (process.platform === 'linux') {
 
 		chromePassword = 'peanuts';
+		crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
 
 	}
-
-	crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
 
 }
 
@@ -109,7 +110,7 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 		out += cookie.host_key + '\t';
 		out += ((cookie.host_key === '.' + domain) ? 'TRUE' : 'FALSE') + '\t';
 		out += cookie.path + '\t';
-		out += (cookie.secure ? 'TRUE' : 'FALSE') + '\t';
+		out += (cookie.is_secure ? 'TRUE' : 'FALSE') + '\t';
 
 		if (cookie.has_expires) {
 			out += convertChromiumTimestampToUnix(cookie.expires_utc).toString() + '\t';
@@ -181,11 +182,11 @@ function convertRawToSetCookieStrings(cookies) {
 		out += 'Domain=' + cookie.host_key + '; ';
 		out += 'Path=' + cookie.path;
 
-		if (cookie.secure) {
+		if (cookie.is_secure) {
 			out += '; Secure';
 		}
 
-		if (cookie.httponly) {
+		if (cookie.is_httponly) {
 			out += '; HttpOnly';
 		}
 
@@ -256,7 +257,7 @@ var getCookies = function (uri, format, callback) {
 			// ORDER BY tries to match sort order specified in
 			// RFC 6265 - Section 5.4, step 2
 			// http://tools.ietf.org/html/rfc6265#section-5.4
-			db.each("SELECT host_key, path, secure, expires_utc, name, value, encrypted_value, creation_utc, httponly, has_expires, persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC", function (err, cookie) {
+			db.each("SELECT host_key, path, is_secure, expires_utc, name, value, encrypted_value, creation_utc, is_httponly, has_expires, is_persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC", function (err, cookie) {
 
 				var encryptedValue,
 					value;
@@ -284,7 +285,7 @@ var getCookies = function (uri, format, callback) {
 
 				cookies.forEach(function (cookie) {
 
-					if (cookie.secure && !isSecure) {
+					if (cookie.is_secure && !isSecure) {
 						return;
 					}
 
