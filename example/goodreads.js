@@ -1,6 +1,6 @@
 var chrome = require('../index');
 
-chrome.getCookies('https://www.goodreads.com', 'header', function (err, cookies) {
+chrome.getCookies('https://www.goodreads.com', function (err, cookies) {
 
 	if (err) {
 		console.error(err);
