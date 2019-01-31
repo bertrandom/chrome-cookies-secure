@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "int": "^0.2.0",
-    "request": "^2.49.0",
-    "sqlite3": "^3.0.4",
+    "request": "^2.88.0",
+    "sqlite3": "^4.0.6",
     "tldjs": "^1.5.1",
     "tough-cookie": "^2.3.4"
   },
