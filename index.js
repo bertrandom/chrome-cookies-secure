@@ -46,7 +46,7 @@ function decrypt(key, encryptedData) {
 		decoded,
 		final,
 		padding,
-		iv = new Buffer(new Array(KEYLENGTH + 1).join(' '), 'binary');
+		iv = new Buffer.from(new Array(KEYLENGTH + 1).join(' '), 'binary');
 
 	decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
 	decipher.setAutoPadding(false);
@@ -157,7 +157,7 @@ function convertRawToJar(cookies, uri) {
 
 		var jarCookie = request.cookie(cookie.name + '=' + cookie.value);
 		if (jarCookie) {
-			jar.setCookie(jarCookie, uri);			
+			jar.setCookie(jarCookie, uri);
 		}
 
 	});
@@ -174,7 +174,7 @@ function convertRawToSetCookieStrings(cookies) {
 	cookies.forEach(function(cookie, index) {
 
 		var out = '';
-		
+
 		var dateExpires = new Date(convertChromiumTimestampToUnix(cookie.expires_utc) * 1000);
 
 		out += cookie.name + '=' + cookie.value + '; ';
@@ -343,9 +343,9 @@ var getCookies = function (uri, format, callback) {
 
 				db.close(function(err) {
 					if (!err) {
-						dbClosed = true;						
+						dbClosed = true;
 					}
-					return callback(null, output);					
+					return callback(null, output);
 				});
 
 			});
