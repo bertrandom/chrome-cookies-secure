@@ -198,7 +198,7 @@ function convertRawToPuppeteerState(cookies) {
 		if (cookie.is_httponly) {
 			newCookieObject['HttpOnly'] = true
 		}
-        cookiesToSave.push(newCookieObject)
+        puppeteerCookies.push(newCookieObject)
 	})
 
 	return puppeteerCookies;
