@@ -14,6 +14,8 @@ chrome.getCookies('https://yourURL.com', 'puppeteer', function(err, cookies) {
     cookiesToSave = cookies
 }, 'YourChromeProfile')
 
+// Profiles can be found in '~/Library/Application Support/Google/Chrome/${profile}' 
+
 // await page.waitFor(2000);
 await page.setCookie(...cookiesToSave);
 
