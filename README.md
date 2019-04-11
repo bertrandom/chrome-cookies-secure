@@ -70,7 +70,7 @@ let puppeteerCookies;
 
 chrome.getCookies('http://www.example.com/path/', function(err, cookies) {
 	puppeteerCookies = cookies;
-}, 'Profile 24');
+}, 'YourChromeProfile'); // Profiles can be found in '~/Library/Application Support/Google/Chrome/${profile}' 
 
 await page.waitFor(1000);
 await page.setCookie(...puppeteerCookies);

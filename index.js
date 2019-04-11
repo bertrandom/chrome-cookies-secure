@@ -223,10 +223,12 @@ function convertRawToObject(cookies) {
 	jar - request module compatible jar https://github.com/request/request#requestjar
 	set-cookie - Array of set-cookie strings
 	header - "cookie" header string
+	puppeteer - array of cookie objects that can be loaded straight into puppeteer setCookie(...)
 	object - key/value of name/value pairs, overlapping names are overwritten
 
  */
-const getCookies = function (uri, format, profile, callback) {
+
+const getCookies = async (uri, format, callback, profile) => {
 
 	profile ? profile : profile = 'Default'
 
@@ -284,6 +286,7 @@ const getCookies = function (uri, format, profile, callback) {
 			// ORDER BY tries to match sort order specified in
 			// RFC 6265 - Section 5.4, step 2
 			// http://tools.ietf.org/html/rfc6265#section-5.4
+			
 			db.each("SELECT host_key, path, is_secure, expires_utc, name, value, encrypted_value, creation_utc, is_httponly, has_expires, is_persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC", function (err, cookie) {
 
 				var encryptedValue,
