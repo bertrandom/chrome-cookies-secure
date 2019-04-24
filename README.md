@@ -10,7 +10,7 @@ npm install chrome-cookies-secure
 
 ## API
 
-getCookies(url[,format],callback)
+getCookies(url[,format],callback,profile)
 ---------------------------------
 
 `url` should be a fully qualified url, e.g. `http://www.example.com/path/`
@@ -23,6 +23,7 @@ curl | [Netscape HTTP Cookie File](http://curl.haxx.se/docs/http-cookies.html) c
 jar | cookie jar compatible with [request](https://www.npmjs.org/package/request)
 set-cookie | Array of Set-Cookie header values
 header | `cookie` header string, similar to what a browser would send
+puppeteer | an array of objects that can be loaded directly into puppeteer setCookie(...) for testing
 object | (default) Object where key is the cookie name and value is the cookie value. These are written in order so it's possible that duplicate cookie names will be overriden by later values
 
 If `format` is not specified, `object` will be used as the format by default.
@@ -35,7 +36,7 @@ basic usage
 -----------
 
 ```
-var chrome = require('chrome-cookies-secure');
+const chrome = require('chrome-cookies-secure');
 chrome.getCookies('http://www.example.com/path/', function(err, cookies) {
 	console.log(cookies);
 });
@@ -45,14 +46,36 @@ jar used with request
 ---------------------
 
 ```
-var request = require('request');
-var chrome = require('chrome-cookies-secure');
+const request = require('request');
+const chrome = require('chrome-cookies-secure');
 
 chrome.getCookies('http://www.example.com/', 'jar', function(err, jar) {
 	request({url: 'http://www.example.com/', jar: jar}, function (err, response, body) {
 		console.log(body);
 	});
 });
+
+```
+
+puppeteer with specific Chrome profile
+---------------------
+
+```
+const chrome = require('chrome-cookies-secure');
+const puppeteer = require('puppeteer')
+
+// puppeteer page launch stuff
+
+let puppeteerCookies;
+
+chrome.getCookies('http://www.example.com/path/', function(err, cookies) {
+	puppeteerCookies = cookies;
+}, 'YourChromeProfile'); 
+
+// Profiles can be found in '~/Library/Application Support/Google/Chrome' 
+
+await page.waitFor(1000);
+await page.setCookie(...puppeteerCookies);
 
 ```
 

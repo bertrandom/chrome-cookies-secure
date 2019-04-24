@@ -16,27 +16,9 @@ var sqlite3 = require('sqlite3'),
 	ITERATIONS,
 	dbClosed = false;
 
-if (process.platform === 'darwin') {
-
-	path = process.env.HOME + '/Library/Application Support/Google/Chrome/Default/Cookies';
-	ITERATIONS = 1003;
-
-} else if (process.platform === 'linux') {
-
-	path = process.env.HOME + '/.config/google-chrome/Default/Cookies';
-	ITERATIONS = 1;
-
-} else {
-
-	console.error('Only Mac and Linux are supported.');
-	process.exit();
-
-}
-
 var	KEYLENGTH = 16,
-	SALT = 'saltysalt',
-	db = new sqlite3.Database(path);
-
+	SALT = 'saltysalt'
+	
 // Decryption based on http://n8henrie.com/2014/05/decrypt-chrome-cookies-with-python/
 // Inspired by https://www.npmjs.org/package/chrome-cookies
 
@@ -179,8 +161,8 @@ function convertRawToSetCookieStrings(cookies) {
 
 		out += cookie.name + '=' + cookie.value + '; ';
 		out += 'expires=' + tough.formatDate(dateExpires) + '; ';
-		out += 'Domain=' + cookie.host_key + '; ';
-		out += 'Path=' + cookie.path;
+		out += 'domain=' + cookie.host_key + '; ';
+		out += 'path=' + cookie.path;
 
 		if (cookie.is_secure) {
 			out += '; Secure';
@@ -196,6 +178,30 @@ function convertRawToSetCookieStrings(cookies) {
 
 	return strings;
 
+}
+
+function convertRawToPuppeteerState(cookies) {
+
+	let puppeteerCookies = [];
+	
+	cookies.forEach(function(cookie, index) {
+		const newCookieObject = {
+			name: cookie.name,
+			value: cookie.value,
+			expires: cookie.expires_utc,
+			domain: cookie.host_key,
+			path: cookie.path
+		}
+		if (cookie.is_secure) {
+			newCookieObject['Secure'] = true
+		}
+		if (cookie.is_httponly) {
+			newCookieObject['HttpOnly'] = true
+		}
+        puppeteerCookies.push(newCookieObject)
+	})
+
+	return puppeteerCookies;
 }
 
 function convertRawToObject(cookies) {
@@ -217,10 +223,33 @@ function convertRawToObject(cookies) {
 	jar - request module compatible jar https://github.com/request/request#requestjar
 	set-cookie - Array of set-cookie strings
 	header - "cookie" header string
+	puppeteer - array of cookie objects that can be loaded straight into puppeteer setCookie(...)
 	object - key/value of name/value pairs, overlapping names are overwritten
 
  */
-var getCookies = function (uri, format, callback) {
+
+const getCookies = async (uri, format, callback, profile) => {
+
+	profile ? profile : profile = 'Default'
+
+	if (process.platform === 'darwin') {
+
+		path = process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
+		ITERATIONS = 1003;
+	
+	} else if (process.platform === 'linux') {
+	
+		path = process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
+		ITERATIONS = 1;
+	
+	} else {
+	
+		console.error('Only Mac and Linux are supported.');
+		process.exit();
+	
+	}
+
+	db = new sqlite3.Database(path);
 
 	if (format instanceof Function) {
 		callback = format;
@@ -257,6 +286,7 @@ var getCookies = function (uri, format, callback) {
 			// ORDER BY tries to match sort order specified in
 			// RFC 6265 - Section 5.4, step 2
 			// http://tools.ietf.org/html/rfc6265#section-5.4
+			
 			db.each("SELECT host_key, path, is_secure, expires_utc, name, value, encrypted_value, creation_utc, is_httponly, has_expires, is_persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC", function (err, cookie) {
 
 				var encryptedValue,
@@ -333,6 +363,10 @@ var getCookies = function (uri, format, callback) {
 						output = convertRawToHeader(validCookies);
 						break;
 
+					case 'puppeteer':
+						output = convertRawToPuppeteerState(validCookies)
+						break;
+
 					case 'object':
 						/* falls through */
 					default:
@@ -357,5 +391,5 @@ var getCookies = function (uri, format, callback) {
 };
 
 module.exports = {
-	getCookies: getCookies,
+	getCookies
 };
