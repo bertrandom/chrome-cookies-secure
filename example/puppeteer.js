@@ -1,32 +1,27 @@
-// const browser = await puppeteer.launch({ 
-//  // your args
-// });
+const chrome = require('chrome-cookies-secure');
+const puppeteer = require('puppeteer');
 
-// const page = await browser.newPage();
+const url = 'https://www.yourUrl.com/';
 
-let cookiesToSave;
+const getCookies = (callback) => {
+    chrome.getCookies(url, 'puppeteer', function(err, cookies) {
+        if (err) {
+            console.log(err, 'error');
+            return
+        }
+        console.log(cookies, 'cookies');
+        callback(cookies);
+    }, 'yourProfile') // e.g. 'Profile 2'
+}
 
-chrome.getCookies('https://yourURL.com', 'puppeteer', function(err, cookies) {
-    if (err) {
-        console.log({message: 'error', err});
-        return
-    }
-    cookiesToSave = cookies
-}, 'YourChromeProfile')
+getCookies(async (cookies) => {
+    const browser = await puppeteer.launch({ 
+        headless: false
+    });
+    const page = await browser.newPage();
 
-// Profiles can be found in '~/Library/Application Support/Google/Chrome' 
-
-// await page.waitFor(2000);
-await page.setCookie(...cookiesToSave);
-
-// let result = await page.evaluate(() => {
-//     let stuff;
-//     // do stuff here
-//     return stuff; 
-// })
-// .catch((e) => {
-//     // catch any errors
-// });
-
-// browser.close();
-// return result
+    await page.setCookie(...cookies);
+    await page.goto(url);
+    await page.waitFor(2000);
+    browser.close();
+});
