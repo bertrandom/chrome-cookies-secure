@@ -11,6 +11,8 @@ var sqlite3 = require('sqlite3'),
 	int = require('int'),
 	url = require('url'),
 	crypto = require('crypto'),
+	os = require('os'),
+	dpapi,
 	Cookie = tough.Cookie,
 	path,
 	ITERATIONS,
@@ -67,6 +69,12 @@ function getDerivedKey(callback) {
 
 		chromePassword = 'peanuts';
 		crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
+
+	} else if (process.platform === 'win32') {
+
+		// On Windows, the crypto is managed entirely by the OS.  We never see the keys.
+		dpapi = require('win-dpapi');
+		callback(null, null);
 
 	}
 
@@ -242,10 +250,13 @@ const getCookies = async (uri, format, callback, profile) => {
 		path = process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
 		ITERATIONS = 1;
 	
+	} else if (process.platform === 'win32') {
+
+		path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
+
 	} else {
 	
-		console.error('Only Mac and Linux are supported.');
-		process.exit();
+		return callback(new Error('Only Mac, Windows, and Linux are supported.'));
 	
 	}
 
@@ -298,7 +309,13 @@ const getCookies = async (uri, format, callback, profile) => {
 
 				if (cookie.value === '' && cookie.encrypted_value.length > 0) {
 					encryptedValue = cookie.encrypted_value;
-					cookie.value = decrypt(derivedKey, encryptedValue);
+
+					if (process.platform === 'win32') {
+						cookie.value = dpapi.unprotectData(encryptedValue, null, 'CurrentUser').toString('utf-8');
+					} else {
+						cookie.value = decrypt(derivedKey, encryptedValue);
+					}
+
 					delete cookie.encrypted_value;
 				}
 

@@ -20,7 +20,8 @@
   "license": "MIT",
   "os": [
     "darwin",
-    "linux"
+    "linux",
+    "win32"
   ],
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "tough-cookie": "^2.3.4"
   },
   "optionalDependencies": {
-    "keytar": "^4.2.1"
+    "keytar": "^4.2.1",
+    "win-dpapi": "^0.1.0"
   }
 }

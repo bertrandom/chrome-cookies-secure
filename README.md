@@ -1,6 +1,6 @@
 # chrome-cookies-secure
 
-Extract encrypted Google Chrome cookies for a url on Mac OS X or Linux
+Extract encrypted Google Chrome cookies for a url on Mac OS X, Windows, or Linux
 
 ## Installation
 
