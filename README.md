@@ -13,7 +13,7 @@ npm install chrome-cookies-secure
 getCookies(url[,format],callback,profile)
 ---------------------------------
 
-`url` should be a fully qualified url, e.g. `http://www.example.com/path/`
+`url` should be a fully qualified url, e.g. `https://www.example.com/path`
 
 `format` is optional and can be one of the following values:
 
@@ -23,7 +23,7 @@ curl | [Netscape HTTP Cookie File](http://curl.haxx.se/docs/http-cookies.html) c
 jar | cookie jar compatible with [request](https://www.npmjs.org/package/request)
 set-cookie | Array of Set-Cookie header values
 header | `cookie` header string, similar to what a browser would send
-puppeteer | an array of objects that can be loaded directly into puppeteer setCookie(...) for testing
+puppeteer | an array of objects that can be loaded into puppeteer using the `setCookie(...)` method
 object | (default) Object where key is the cookie name and value is the cookie value. These are written in order so it's possible that duplicate cookie names will be overriden by later values
 
 If `format` is not specified, `object` will be used as the format by default.
@@ -35,9 +35,9 @@ Cookie order tries to follow [RFC 6265 - Section 5.4, step 2](http://tools.ietf.
 basic usage
 -----------
 
-```
+```javascript
 const chrome = require('chrome-cookies-secure');
-chrome.getCookies('http://www.example.com/path/', function(err, cookies) {
+chrome.getCookies('https://www.example.com/path/', function(err, cookies) {
 	console.log(cookies);
 });
 ```
@@ -45,12 +45,12 @@ chrome.getCookies('http://www.example.com/path/', function(err, cookies) {
 jar used with request
 ---------------------
 
-```
+```javascript
 const request = require('request');
 const chrome = require('chrome-cookies-secure');
 
-chrome.getCookies('http://www.example.com/', 'jar', function(err, jar) {
-	request({url: 'http://www.example.com/', jar: jar}, function (err, response, body) {
+chrome.getCookies('https://www.example.com/', 'jar', function(err, jar) {
+	request({url: 'https://www.example.com/', jar: jar}, function (err, response, body) {
 		console.log(body);
 	});
 });
@@ -60,22 +60,34 @@ chrome.getCookies('http://www.example.com/', 'jar', function(err, jar) {
 puppeteer with specific Chrome profile
 ---------------------
 
-```
+```javascript
 const chrome = require('chrome-cookies-secure');
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer');
 
-// puppeteer page launch stuff
+const url = 'https://www.yourUrl.com/';
 
-let puppeteerCookies;
+const getCookies = (callback) => {
+    chrome.getCookies(url, 'puppeteer', function(err, cookies) {
+        if (err) {
+            console.log(err, 'error');
+            return
+        }
+        console.log(cookies, 'cookies');
+        callback(cookies);
+    }, 'yourProfile') // e.g. 'Profile 2'
+}
 
-chrome.getCookies('http://www.example.com/path/', function(err, cookies) {
-	puppeteerCookies = cookies;
-}, 'YourChromeProfile'); 
+getCookies(async (cookies) => {
+    const browser = await puppeteer.launch({ 
+        headless: false
+    });
+    const page = await browser.newPage();
 
-// Profiles can be found in '~/Library/Application Support/Google/Chrome' 
-
-await page.waitFor(1000);
-await page.setCookie(...puppeteerCookies);
+    await page.setCookie(...cookies);
+    await page.goto(url);
+    await page.waitFor(1000);
+    browser.close();
+});
 
 ```
 
