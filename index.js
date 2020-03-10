@@ -12,6 +12,7 @@ var sqlite3 = require('sqlite3'),
 	url = require('url'),
 	crypto = require('crypto'),
 	os = require('os'),
+	fs = require('fs'),
 	dpapi,
 	Cookie = tough.Cookie,
 	path,
@@ -224,6 +225,15 @@ function convertRawToObject(cookies) {
 
 }
 
+function decryptAES256GCM(key, enc, nonce, tag) {
+	const algorithm = 'aes-256-gcm';
+	const decipher = crypto.createDecipheriv(algorithm, key, nonce);
+	decipher.setAuthTag(tag);
+	let str = decipher.update(enc,'base64','utf8');
+	str += decipher.final('utf-8');
+	return str;
+}
+
 /*
 
 	Possible formats:
@@ -311,7 +321,19 @@ const getCookies = async (uri, format, callback, profile) => {
 					encryptedValue = cookie.encrypted_value;
 
 					if (process.platform === 'win32') {
-						cookie.value = dpapi.unprotectData(encryptedValue, null, 'CurrentUser').toString('utf-8');
+						if (encryptedValue[0] == 0x01 && encryptedValue[1] == 0x00 && encryptedValue[2] == 0x00 && encryptedValue[3] == 0x00){
+							cookie.value = dpapi.unprotectData(encryptedValue, null, 'CurrentUser').toString('utf-8');
+
+						} else if (encryptedValue[0] == 0x76 && encryptedValue[1] == 0x31 && encryptedValue[2] == 0x30 ){
+							localState = JSON.parse(fs.readFileSync(os.homedir() + '/AppData/Local/Google/Chrome/User Data/Local State'));
+							b64encodedKey = localState.os_crypt.encrypted_key;
+							encryptedKey = new Buffer.from(b64encodedKey,'base64');
+							key = dpapi.unprotectData(encryptedKey.slice(5, encryptedKey.length), null, 'CurrentUser');
+							nonce = encryptedValue.slice(3, 15);
+							tag = encryptedValue.slice(encryptedValue.length - 16, encryptedValue.length);
+							encryptedValue = encryptedValue.slice(15, encryptedValue.length - 16);
+							cookie.value = decryptAES256GCM(key, encryptedValue, nonce, tag).toString('utf-8');
+						}
 					} else {
 						cookie.value = decrypt(derivedKey, encryptedValue);
 					}
