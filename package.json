@@ -30,7 +30,7 @@
   "dependencies": {
     "int": "^0.2.0",
     "request": "^2.88.0",
-    "sqlite3": "^4.1.1",
+    "sqlite3": "^5.0.2",
     "tldjs": "^1.5.1",
     "tough-cookie": "^2.3.4"
   },
