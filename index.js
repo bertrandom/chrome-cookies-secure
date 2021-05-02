@@ -21,7 +21,7 @@ var sqlite3 = require('sqlite3'),
 
 var	KEYLENGTH = 16,
 	SALT = 'saltysalt'
-	
+
 // Decryption based on http://n8henrie.com/2014/05/decrypt-chrome-cookies-with-python/
 // Inspired by https://www.npmjs.org/package/chrome-cookies
 
@@ -429,6 +429,21 @@ const getCookies = async (uri, format, callback, profile) => {
 
 };
 
+/**
+ * Promise wrapper for the main callback function
+ */
+const getCookiesPromised = async (uri, format, profile) => {
+	return new Promise((resolve, reject) => {
+		getCookies(uri, format, function(err, cookies) {
+			if (err) {
+				return reject(err)
+			}
+			resolve(cookies)
+		}, profile)
+	})
+}
+
 module.exports = {
-	getCookies
+	getCookies,
+	getCookiesPromised
 };

@@ -91,6 +91,19 @@ getCookies(async (cookies) => {
 
 ```
 
+Calling using async/await
+---------------------
+
+```javascript
+const chrome = require('chrome-cookies-secure');
+const url = 'https://www.yourUrl.com/';
+
+const myFunction = async () => {
+    const cookies = await chrome.getCookiesPromised(url, 'puppeteer', 'Profile 28')
+    // ..... Use the cookies
+}
+```
+
 ## Limitations
 
 On OS X, this module requires Keychain Access to read the Google Chrome encryption key. The first time you use it, it will popup this dialog:
