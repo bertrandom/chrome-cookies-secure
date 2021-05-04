@@ -248,24 +248,19 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 
 const getCookies = async (uri, format, callback, profileOrPath) => {
 
-	if (/\//.test(profileOrPath))
-		path = profileOrPath;
-	else
-		profile = profileOrPath;
-
 	if (process.platform === 'darwin') {
 
-		path ? path : path = process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
+		path = /\//.test(profileOrPath) ? profileOrPath : process.env.HOME + `/Library/Application Support/Google/Chrome/${profileOrPath}/Cookies`;
 		ITERATIONS = 1003;
 	
 	} else if (process.platform === 'linux') {
 	
-		path ? path : path = process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
+		path = /\//.test(profileOrPath) ? profileOrPath : process.env.HOME + `/.config/google-chrome/${profileOrPath}/Cookies`;
 		ITERATIONS = 1;
 	
 	} else if (process.platform === 'win32') {
 
-		path ? path : path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
+		path = /\\/.test(profileOrPath) ? profileOrPath : os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profileOrPath}\\Cookies`;
 
 	} else {
 	
