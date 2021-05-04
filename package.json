@@ -36,6 +36,6 @@
   },
   "optionalDependencies": {
     "keytar": "^5.0.0",
-    "win-dpapi": "^0.1.0"
+    "win-dpapi": "^1.1.0"
   }
 }
