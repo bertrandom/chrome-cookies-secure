@@ -248,7 +248,7 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 
 const getCookies = async (uri, format, callback, profileOrPath) => {
 
-	var profile;
+	var path, profile;
 	if (fs.existsSync(profileOrPath))
 		path = profileOrPath;
 	else
