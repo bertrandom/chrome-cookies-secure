@@ -93,7 +93,7 @@ function convertChromiumTimestampToUnix(timestamp) {
 
 function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 
-	var out = '',
+	var out = '# Netscape HTTP Cookie File\n',
 		cookieLength = cookies.length;
 
 	cookies.forEach(function (cookie, index) {
