@@ -263,7 +263,11 @@ const getCookies = async (uri, format, callback, profile) => {
 	} else if (process.platform === 'win32') {
 
 		path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
-
+		
+		if (!fs.existsSync(path)) {
+			path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
+		}
+		
 	} else {
 	
 		return callback(new Error('Only Mac, Windows, and Linux are supported.'));
