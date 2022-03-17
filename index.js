@@ -262,10 +262,10 @@ const getCookies = async (uri, format, callback, profile) => {
 	
 	} else if (process.platform === 'win32') {
 
-		path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
+		path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
 		
 		if (!fs.existsSync(path)) {
-			path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
+			path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
 		}
 		
 	} else {
