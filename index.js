@@ -76,9 +76,7 @@ function getDerivedKey(callback) {
 		// On Windows, the crypto is managed entirely by the OS.  We never see the keys.
 		dpapi = require('win-dpapi');
 		callback(null, null);
-
 	}
-
 }
 
 // Chromium stores its timestamps in sqlite on the Mac using the Windows Gregorian epoch

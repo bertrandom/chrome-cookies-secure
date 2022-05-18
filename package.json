@@ -32,9 +32,7 @@
     "request": "^2.88.0",
     "sqlite3": "^4.1.1",
     "tldjs": "^1.5.1",
-    "tough-cookie": "^2.3.4"
-  },
-  "optionalDependencies": {
+    "tough-cookie": "^2.3.4",
     "keytar": "^5.0.0",
     "win-dpapi": "^0.1.0"
   }
