@@ -13,11 +13,12 @@ var sqlite3 = require('sqlite3'),
 	crypto = require('crypto'),
 	os = require('os'),
 	fs = require('fs'),
-	dpapi,
 	Cookie = tough.Cookie,
 	path,
 	ITERATIONS,
 	dbClosed = false;
+
+const dpapi = require('win-dpapi')
 
 var	KEYLENGTH = 16,
 	SALT = 'saltysalt'
@@ -74,7 +75,6 @@ function getDerivedKey(callback) {
 
 	} else if (process.platform === 'win32') {
 		// On Windows, the crypto is managed entirely by the OS.  We never see the keys.
-		dpapi = require('win-dpapi');
 		callback(null, null);
 	}
 }

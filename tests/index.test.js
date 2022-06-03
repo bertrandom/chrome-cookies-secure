@@ -19,7 +19,7 @@ const url = 'https://www.google.com'
 
 // These tests are not part of a CI / CD
 // To run locally, they assumes you have some cookies for google.com under the 'Default' browser profile
-xit('Should get basic cookies from the defined url', async () => {
+it('Should get basic cookies from the defined url', async () => {
     const cookiesBasic = await chrome.getCookiesPromised(url)
     if (!Object.keys(cookiesBasic).length) {
         throw new Error('No cookie found')
@@ -28,7 +28,7 @@ xit('Should get basic cookies from the defined url', async () => {
     // await joi.validate(cookiesBasic, joi.object().required());
 }).timeout(3000)
 
-xit('Should get puppeteer cookies from the defined url', async () => {
+it('Should get puppeteer cookies from the defined url', async () => {
     const cookiesPuppeteer = await chrome.getCookiesPromised(url, 'puppeteer')
     await joi.validate(cookiesPuppeteer, puppeteerCookie);
 }).timeout(3000)
