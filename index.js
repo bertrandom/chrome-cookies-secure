@@ -59,6 +59,7 @@ function getDerivedKey(callback) {
 	var keytar,
 		chromePassword;
 
+
 	if (process.platform === 'darwin') {
 
 		keytar = require('keytar');
@@ -72,7 +73,6 @@ function getDerivedKey(callback) {
 		crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
 
 	} else if (process.platform === 'win32') {
-
 		// On Windows, the crypto is managed entirely by the OS.  We never see the keys.
 		dpapi = require('win-dpapi');
 		callback(null, null);

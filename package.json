@@ -14,7 +14,7 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/index.test -t 60000"
+    "test": "mocha tests/index.test.js -t 5000"
   },
   "author": "Bertrand Fan <bert@bert.org> (https://bert.org/)",
   "license": "MIT",
@@ -37,9 +37,9 @@
     "win-dpapi": "^1.1.0"
   },
   "devDependencies": {
-    "joi": "^14.3.1",
     "@types/joi": "^14.3.1",
-    "mocha": "^8.4.0"
+    "joi": "^14.3.1",
+    "mocha": "^10.0.0"
   },
   "engines": {
     "node": ">=12.18.4"
