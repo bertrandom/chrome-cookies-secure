@@ -35,7 +35,7 @@
     "tough-cookie": "^2.3.4"
   },
   "optionalDependencies": {
-    "keytar": "^7.9.0",
-    "win-dpapi": "^0.1.0"
+    "win-dpapi": "^1.1.0",
+    "keytar": "^7.9.0"
   }
 }
