@@ -13,8 +13,8 @@ var sqlite3 = require('sqlite3'),
 	crypto = require('crypto'),
 	os = require('os'),
 	fs = require('fs'),
-	dpapi,
 	Cookie = tough.Cookie,
+	dpapi,
 	path,
 	ITERATIONS,
 	dbClosed = false;
@@ -78,7 +78,7 @@ function getDerivedKey(callback) {
 		callback(null, null);
 
 	}
-
+	
 }
 
 // Chromium stores its timestamps in sqlite on the Mac using the Windows Gregorian epoch
