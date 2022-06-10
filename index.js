@@ -305,7 +305,18 @@ const getCookies = async (uri, format, callback, profile) => {
 			var domain = tld.getDomain(uri);
 
 			if (!domain) {
-				return callback(new Error('Could not parse domain from URI, format should be http://www.example.com/path/'));
+				// tld parser doesn't like urls like http://localhost:3000, so as a fallback, try URL parsing logic
+				const failureCallback = () => callback(new Error('Could not parse domain from URI, format should be http://www.example.com/path/'));
+
+				try {
+				  	domain = new URL(uri).hostname
+					if (!domain) {
+						// Still no dice, so fail
+						return failureCallback()
+					}
+				} catch {
+					return failureCallback()
+				}
 			}
 
 			// ORDER BY tries to match sort order specified in
