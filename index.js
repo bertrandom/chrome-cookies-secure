@@ -13,15 +13,14 @@ var sqlite3 = require('sqlite3'),
 	crypto = require('crypto'),
 	os = require('os'),
 	fs = require('fs'),
-	dpapi,
 	Cookie = tough.Cookie,
-	path,
+	dpapi,
 	ITERATIONS,
 	dbClosed = false;
 
 var	KEYLENGTH = 16,
 	SALT = 'saltysalt'
-	
+
 // Decryption based on http://n8henrie.com/2014/05/decrypt-chrome-cookies-with-python/
 // Inspired by https://www.npmjs.org/package/chrome-cookies
 
@@ -78,7 +77,6 @@ function getDerivedKey(callback) {
 		callback(null, null);
 
 	}
-
 }
 
 // Chromium stores its timestamps in sqlite on the Mac using the Windows Gregorian epoch
@@ -86,9 +84,7 @@ function getDerivedKey(callback) {
 // This converts it to a UNIX timestamp
 
 function convertChromiumTimestampToUnix(timestamp) {
-
 	return int(timestamp.toString()).sub('11644473600000000').div(1000000);
-
 }
 
 function convertRawToNetscapeCookieFileFormat(cookies, domain) {
@@ -246,33 +242,58 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 
  */
 
-const getCookies = async (uri, format, callback, profileOrPath) => {
+/**
+ * Converts profileOrPath argument into a path
+ */
+const getPath = (profileOrPath) => {
+	const pathIdentifiers = ['/', '\\'];
+	const looksLikePath = () =>
+		pathIdentifiers.some(pathIdentifier => profileOrPath.includes(pathIdentifier));
+	
+	// Only run existsSync if it looks like a path
+	if (
+		profileOrPath && 
+		looksLikePath() &&
+		fs.existsSync(profileOrPath)
+	) {
+		const path = profileOrPath
+		return path;
+	}
 
-	var path, profile;
-	if (fs.existsSync(profileOrPath))
-		path = profileOrPath;
-	else
-		profile = profileOrPath;
+	const defaultProfile = 'Default';
+	const profile = profileOrPath || defaultProfile;
 
 	if (process.platform === 'darwin') {
-
-		path ? path : path = process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
 		ITERATIONS = 1003;
-	
-	} else if (process.platform === 'linux') {
-	
-		path ? path : path = process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
-		ITERATIONS = 1;
-	
-	} else if (process.platform === 'win32') {
-
-		path ? path : path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
-
-	} else {
-	
-		return callback(new Error('Only Mac, Windows, and Linux are supported.'));
-	
+		return process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
 	}
+	
+	if (process.platform === 'linux') {
+		ITERATIONS = 1;
+		return process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
+	}
+	
+	if (process.platform === 'win32') {
+		const path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
+		
+		if (fs.existsSync(path)) {
+			return path;
+		}
+
+		return os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
+	}
+
+	return callback(new Error('Only Mac, Windows, and Linux are supported.'));
+}
+
+/**
+ * @param {*} uri - the site to retrieve cookies for 
+ * @param {*} format - the format you want the cookies returned in
+ * @param {*} callback - 
+ * @param {*} profileOrPath - if empty will use the 'Default' profile in default Chrome location; if specified can be an alternative profile name e.g. 'Profile 1' or an absolute path to an alternative user-data-dir
+ */
+const getCookies = async (uri, format, callback, profileOrPath) => {
+	const path = getPath(profileOrPath);
 
 	db = new sqlite3.Database(path);
 
@@ -433,6 +454,24 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
 };
 
+/**
+ * Promise wrapper for the main callback function
+ * @param {*} uri - the site to retrieve cookies for 
+ * @param {*} format - the format you want the cookies returned in
+ * @param {*} profileOrPath - if empty will use the 'Default' profile in default Chrome location; if specified can be an alternative profile name e.g. 'Profile 1' or an absolute path to an alternative user-data-dir
+ */
+const getCookiesPromised = async (uri, format, profileOrPath) => {
+	return new Promise((resolve, reject) => {
+		getCookies(uri, format, function(err, cookies) {
+			if (err) {
+				return reject(err)
+			}
+			resolve(cookies)
+		}, profileOrPath)
+	})
+}
+
 module.exports = {
-	getCookies
+	getCookies,
+	getCookiesPromised
 };
