@@ -75,45 +75,51 @@ function getDerivedKey(callback) {
 		// On Windows, the crypto is managed entirely by the OS.  We never see the keys.
 		dpapi = require('win-dpapi');
 		callback(null, null);
-
 	}
 }
 
 const pathIdentifiers = ['/', '\\'];
 
-const looksLikePath = (profileOrPath) =>
+const isPathFormat = (profileOrPath) =>
+	profileOrPath && 
 	pathIdentifiers.some(pathIdentifier => profileOrPath.includes(pathIdentifier));
+
+/**
+ * Set the iteration count per platform
+ */
+const setIterations = () => {
+	if (process.platform === 'darwin') {
+		ITERATIONS = 1003;
+	}
+
+	if (process.platform === 'linux') {
+		ITERATIONS = 1;
+	}
+}
 
 /**
  * Converts profileOrPath argument into a path
  */
 const getPath = (profileOrPath) => {
-	if (
-		profileOrPath && 
-		// Only run existsSync if it looks like a path
-		looksLikePath(profileOrPath) &&
-		fs.existsSync(profileOrPath)
-	) {
-		const path = profileOrPath
-		return path;
+	if (isPathFormat(profileOrPath) && fs.existsSync(pathEnsuredCookies)) {
+		return profileOrPath
 	}
 
 	const defaultProfile = 'Default';
 	const profile = profileOrPath || defaultProfile;
 
 	if (process.platform === 'darwin') {
-		ITERATIONS = 1003;
 		return process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
 	}
 	
 	if (process.platform === 'linux') {
-		ITERATIONS = 1;
 		return process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
 	}
 	
 	if (process.platform === 'win32') {
 		const path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
-		
+
+		// Windows has two potential locations
 		if (fs.existsSync(path)) {
 			return path;
 		}
@@ -276,7 +282,6 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 }
 
 /*
-
 	Possible formats:
 	curl - Netscape HTTP Cookie File contents usable by curl and wget http://curl.haxx.se/docs/http-cookies.html
 	jar - request module compatible jar https://github.com/request/request#requestjar
@@ -284,7 +289,6 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 	header - "cookie" header string
 	puppeteer - array of cookie objects that can be loaded straight into puppeteer setCookie(...)
 	object - key/value of name/value pairs, overlapping names are overwritten
-
  */
 
 /**
@@ -294,6 +298,7 @@ function decryptAES256GCM(key, enc, nonce, tag) {
  * @param {*} profileOrPath - if empty will use the 'Default' profile in default Chrome location; if specified can be an alternative profile name e.g. 'Profile 1' or an absolute path to an alternative user-data-dir
  */
 const getCookies = async (uri, format, callback, profileOrPath) => {
+	setIterations();
 	const path = getPath(profileOrPath);
 
 	if (path instanceof Error) {
