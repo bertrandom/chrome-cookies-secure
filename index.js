@@ -242,18 +242,19 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 
  */
 
+const pathIdentifiers = ['/', '\\'];
+
+const looksLikePath = (profileOrPath) =>
+	pathIdentifiers.some(pathIdentifier => profileOrPath.includes(pathIdentifier));
+
 /**
  * Converts profileOrPath argument into a path
  */
 const getPath = (profileOrPath) => {
-	const pathIdentifiers = ['/', '\\'];
-	const looksLikePath = () =>
-		pathIdentifiers.some(pathIdentifier => profileOrPath.includes(pathIdentifier));
-	
-	// Only run existsSync if it looks like a path
 	if (
 		profileOrPath && 
-		looksLikePath() &&
+		// Only run existsSync if it looks like a path
+		looksLikePath(profileOrPath) &&
 		fs.existsSync(profileOrPath)
 	) {
 		const path = profileOrPath

@@ -35,13 +35,15 @@ it('Should get puppeteer cookies for the default profile in puppeteer format', a
     await joi.validate(cookies, puppeteerCookie);
 }).timeout(3000)
 
-it('Should get puppeteer cookies for a custom profile in puppeteer format', async () => {
+// Only passes if you alter the customProfile for your use case
+xit('Should get puppeteer cookies for a custom profile in puppeteer format', async () => {
     const customProfile = 'Profile 1';
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customProfile)
     // console.log(cookies)
     await joi.validate(cookies, puppeteerCookie);
 }).timeout(3000)
 
+// Only passes if you are on macOS
 xit('Should get puppeteer cookies for a path on macOS in puppeteer format', async () => {
     const customPath = `${process.env.HOME}/Library/Application Support/Google/Chrome/Default/Cookies`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
@@ -49,15 +51,18 @@ xit('Should get puppeteer cookies for a path on macOS in puppeteer format', asyn
     await joi.validate(cookies, puppeteerCookie);
 }).timeout(3000)
 
+// Only passes if you are on windows
 xit('Should get puppeteer cookies for a path on Windows in puppeteer format', async () => {
-    const customPath = `${process.env.HOME}/Library/Application Support/Google/Chrome/Default/Cookies`;
+    const WINDOWS_PREFIX = 'C:\\Users\\user';
+    const customPath = `${WINDOWS_PREFIX}\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     // console.log(cookies)
     await joi.validate(cookies, puppeteerCookie);
 }).timeout(3000)
 
+// Only passes if you are on linux & have Chromium installed
 xit('Should getpuppeteer cookies for a path on Linux in puppeteer format', async () => {
-    const customPath = `~/.config/chromium/Default/Cookies`;
+    const customPath = `${process.env.HOME}/.config/chromium/Default/Cookies`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     // console.log(cookies)
     await joi.validate(cookies, puppeteerCookie);
