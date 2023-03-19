@@ -121,7 +121,7 @@ const getPath = (profileOrPath) => {
 		return os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
 	}
 
-	return callback(new Error('Only Mac, Windows, and Linux are supported.'));
+	return new Error('Only Mac, Windows, and Linux are supported.');
 }
 
 // Chromium stores its timestamps in sqlite on the Mac using the Windows Gregorian epoch
@@ -295,6 +295,11 @@ function decryptAES256GCM(key, enc, nonce, tag) {
  */
 const getCookies = async (uri, format, callback, profileOrPath) => {
 	const path = getPath(profileOrPath);
+
+	if (path instanceof Error) {
+		const error = path;
+		return callback(error);
+	}
 
 	db = new sqlite3.Database(path);
 
