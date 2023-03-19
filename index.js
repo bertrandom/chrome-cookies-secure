@@ -79,6 +79,51 @@ function getDerivedKey(callback) {
 	}
 }
 
+const pathIdentifiers = ['/', '\\'];
+
+const looksLikePath = (profileOrPath) =>
+	pathIdentifiers.some(pathIdentifier => profileOrPath.includes(pathIdentifier));
+
+/**
+ * Converts profileOrPath argument into a path
+ */
+const getPath = (profileOrPath) => {
+	if (
+		profileOrPath && 
+		// Only run existsSync if it looks like a path
+		looksLikePath(profileOrPath) &&
+		fs.existsSync(profileOrPath)
+	) {
+		const path = profileOrPath
+		return path;
+	}
+
+	const defaultProfile = 'Default';
+	const profile = profileOrPath || defaultProfile;
+
+	if (process.platform === 'darwin') {
+		ITERATIONS = 1003;
+		return process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
+	}
+	
+	if (process.platform === 'linux') {
+		ITERATIONS = 1;
+		return process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
+	}
+	
+	if (process.platform === 'win32') {
+		const path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
+		
+		if (fs.existsSync(path)) {
+			return path;
+		}
+
+		return os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
+	}
+
+	return callback(new Error('Only Mac, Windows, and Linux are supported.'));
+}
+
 // Chromium stores its timestamps in sqlite on the Mac using the Windows Gregorian epoch
 // https://github.com/adobe/chromium/blob/master/base/time_mac.cc#L29
 // This converts it to a UNIX timestamp
@@ -241,51 +286,6 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 	object - key/value of name/value pairs, overlapping names are overwritten
 
  */
-
-const pathIdentifiers = ['/', '\\'];
-
-const looksLikePath = (profileOrPath) =>
-	pathIdentifiers.some(pathIdentifier => profileOrPath.includes(pathIdentifier));
-
-/**
- * Converts profileOrPath argument into a path
- */
-const getPath = (profileOrPath) => {
-	if (
-		profileOrPath && 
-		// Only run existsSync if it looks like a path
-		looksLikePath(profileOrPath) &&
-		fs.existsSync(profileOrPath)
-	) {
-		const path = profileOrPath
-		return path;
-	}
-
-	const defaultProfile = 'Default';
-	const profile = profileOrPath || defaultProfile;
-
-	if (process.platform === 'darwin') {
-		ITERATIONS = 1003;
-		return process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
-	}
-	
-	if (process.platform === 'linux') {
-		ITERATIONS = 1;
-		return process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
-	}
-	
-	if (process.platform === 'win32') {
-		const path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
-		
-		if (fs.existsSync(path)) {
-			return path;
-		}
-
-		return os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
-	}
-
-	return callback(new Error('Only Mac, Windows, and Linux are supported.'));
-}
 
 /**
  * @param {*} uri - the site to retrieve cookies for 
