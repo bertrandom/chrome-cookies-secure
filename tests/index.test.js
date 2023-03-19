@@ -54,7 +54,7 @@ xit('Should get puppeteer cookies for a path on macOS in puppeteer format', asyn
 // Only passes if you are on windows
 xit('Should get puppeteer cookies for a path on Windows in puppeteer format', async () => {
     const WINDOWS_PREFIX = 'C:\\Users\\user';
-    const customPath = `${WINDOWS_PREFIX}\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
+    const customPath = `${WINDOWS_PREFIX}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Network\\Cookies`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     // console.log(cookies)
     await joi.validate(cookies, puppeteerCookie);
