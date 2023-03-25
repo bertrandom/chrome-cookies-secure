@@ -1,7 +1,7 @@
 {
   "name": "chrome-cookies-secure",
   "version": "2.0.1",
-  "description": "Extract encrypted Google Chrome cookies for a url on a Mac or Linux",
+  "description": "Extract encrypted Google Chrome cookies for a url on a Mac, Linux or Windows",
   "types": "index.d.ts",
   "keywords": [
     "google",
