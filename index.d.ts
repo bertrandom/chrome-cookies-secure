@@ -6,6 +6,7 @@ declare module "chrome-cookies-secure" {
     domain: string;
     path: string;
     HttpOnly?: boolean;
+    Secure?: boolean;
   };
 
   type Callback<T> = (err: Error, cookies: T) => void;
