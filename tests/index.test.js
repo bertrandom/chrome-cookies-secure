@@ -34,7 +34,10 @@ it('Should get curl cookies from the defined url', async () => {
 it('Should get jar cookies from the defined url', async () => {
     const cookies = await chrome.getCookiesPromised(url, 'jar')
     await joi.validate(cookies, joi.object({
-        _jar: joi.object({}).required(),
+        _jar: joi.object({
+            enableLooseMode: joi.boolean(),
+            store: joi.object().unknown(true)
+        }).unknown(true).required(),
     }).required());
 })
 
@@ -66,8 +69,14 @@ it('Should get puppeteer cookies for a custom profile in puppeteer format', asyn
 })
 
 // Only passes if you are on macOS
-it('Should get puppeteer cookies for a path on macOS in puppeteer format', async () => {
+it('Should get puppeteer cookies for a path with Cookies on macOS in puppeteer format', async () => {
     const customPath = `${process.env.HOME}/Library/Application Support/Google/Chrome/Default/Cookies`;
+    const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
+    await joi.validate(cookies, puppeteerCookie);
+})
+
+it('Should get puppeteer cookies for a path without cookies on macOS in puppeteer format', async () => {
+    const customPath = `${process.env.HOME}/Library/Application Support/Google/Chrome/Default`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     await joi.validate(cookies, puppeteerCookie);
 })
