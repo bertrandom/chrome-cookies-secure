@@ -4,7 +4,7 @@
  * See the accompanying LICENSE file for terms.
  */
 
-var sqlite3 = require('sqlite3'),
+let sqlite3 = require('sqlite3'),
 	tld = require('tldjs'),
 	tough = require('tough-cookie'),
 	request = require('request'),
@@ -13,7 +13,6 @@ var sqlite3 = require('sqlite3'),
 	crypto = require('crypto'),
 	os = require('os'),
 	fs = require('fs'),
-	Cookie = tough.Cookie,
 	dpapi,
 	ITERATIONS,
 	dbClosed = false;
@@ -47,15 +46,12 @@ function decrypt(key, encryptedData) {
 		decoded = decoded.slice(0, decoded.length - padding);
 	}
 
-	decoded = decoded.toString('utf8');
-
-	return decoded;
-
+	return decoded.toString('utf8');
 }
 
 function getDerivedKey(callback) {
 
-	var keytar,
+	let keytar,
 		chromePassword;
 
 	if (process.platform === 'darwin') {
@@ -97,12 +93,39 @@ const setIterations = () => {
 	}
 }
 
+const caterCookies = (profileOrPath) => {
+	const path = profileOrPath;
+	const cookiesFileName = 'Cookies'
+	const includesCookies = path.slice(-cookiesFileName.length) === cookiesFileName
+
+	if (includesCookies) {
+		return path;
+	}
+
+	if (process.platform === 'darwin' || process.platform === 'linux') {
+		return path.concat(`/${cookiesFileName}`)
+	}
+
+	if (process.platform === 'win32') {
+		return path.concat(`\\${cookiesFileName}`)
+	}
+
+	return path
+}
+
 /**
  * Converts profileOrPath argument into a path
  */
 const getPath = (profileOrPath) => {
-	if (isPathFormat(profileOrPath) && fs.existsSync(pathEnsuredCookies)) {
-		return profileOrPath
+	if (isPathFormat(profileOrPath)) {
+
+		const path = caterCookies(profileOrPath)
+
+		if (!fs.existsSync(path)) {
+			throw new Error(`Path: ${path} not found on drive`);
+		}
+
+		return path
 	}
 
 	const defaultProfile = 'Default';
@@ -140,8 +163,7 @@ function convertChromiumTimestampToUnix(timestamp) {
 
 function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 
-	var out = '',
-		cookieLength = cookies.length;
+	let out = ''
 
 	cookies.forEach(function (cookie, index) {
 
@@ -159,25 +181,23 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 		out += cookie.name + '\t';
 		out += cookie.value + '\t';
 
-		if (cookieLength > index + 1) {
+		if (cookies.length > index + 1) {
 			out += '\n';
 		}
 
 	});
 
 	return out;
-
 }
 
 function convertRawToHeader(cookies) {
 
-	var out = '',
-		cookieLength = cookies.length;
+	let out = '';
 
 	cookies.forEach(function (cookie, index) {
 
 		out += cookie.name + '=' + cookie.value;
-		if (cookieLength > index + 1) {
+		if (cookies.length > index + 1) {
 			out += '; ';
 		}
 
@@ -189,11 +209,11 @@ function convertRawToHeader(cookies) {
 
 function convertRawToJar(cookies, uri) {
 
-	var jar = new request.jar();
+	let jar = new request.jar();
 
-	cookies.forEach(function (cookie, index) {
+	cookies.forEach(function (cookie) {
 
-		var jarCookie = request.cookie(cookie.name + '=' + cookie.value);
+		const jarCookie = request.cookie(cookie.name + '=' + cookie.value);
 		if (jarCookie) {
 			jar.setCookie(jarCookie, uri);
 		}
@@ -206,14 +226,13 @@ function convertRawToJar(cookies, uri) {
 
 function convertRawToSetCookieStrings(cookies) {
 
-	var cookieLength = cookies.length,
-		strings = [];
+	let strings = [];
 
-	cookies.forEach(function(cookie, index) {
+	cookies.forEach(function(cookie) {
 
-		var out = '';
+		let out = '';
 
-		var dateExpires = new Date(convertChromiumTimestampToUnix(cookie.expires_utc) * 1000);
+		let dateExpires = new Date(convertChromiumTimestampToUnix(cookie.expires_utc) * 1000);
 
 		out += cookie.name + '=' + cookie.value + '; ';
 		out += 'expires=' + tough.formatDate(dateExpires) + '; ';
@@ -237,10 +256,8 @@ function convertRawToSetCookieStrings(cookies) {
 }
 
 function convertRawToPuppeteerState(cookies) {
-
-	let puppeteerCookies = [];
 	
-	cookies.forEach(function(cookie, index) {
+	const puppeteerCookies = cookies.map(function(cookie) {
 		const newCookieObject = {
 			name: cookie.name,
 			value: cookie.value,
@@ -248,13 +265,16 @@ function convertRawToPuppeteerState(cookies) {
 			domain: cookie.host_key,
 			path: cookie.path
 		}
+
 		if (cookie.is_secure) {
 			newCookieObject['Secure'] = true
 		}
+
 		if (cookie.is_httponly) {
 			newCookieObject['HttpOnly'] = true
 		}
-        puppeteerCookies.push(newCookieObject)
+
+		return newCookieObject
 	})
 
 	return puppeteerCookies;
@@ -262,9 +282,9 @@ function convertRawToPuppeteerState(cookies) {
 
 function convertRawToObject(cookies) {
 
-	var out = {};
+	let out = {};
 
-	cookies.forEach(function (cookie, index) {
+	cookies.forEach(function (cookie) {
 		out[cookie.name] = cookie.value;
 	});
 
@@ -281,6 +301,25 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 	return str;
 }
 
+const getOutput = (format, validCookies, domain, uri) => {
+	switch (format) {
+
+	case 'curl':
+		return convertRawToNetscapeCookieFileFormat(validCookies, domain);
+	case 'jar':
+		return convertRawToJar(validCookies, uri);
+	case 'set-cookie':
+		return convertRawToSetCookieStrings(validCookies);
+	case 'header':
+		return convertRawToHeader(validCookies);
+	case 'puppeteer':
+		return convertRawToPuppeteerState(validCookies)
+	case 'object':
+		/* falls through */
+	default:
+		return convertRawToObject(validCookies);
+}
+}
 /*
 	Possible formats:
 	curl - Netscape HTTP Cookie File contents usable by curl and wget http://curl.haxx.se/docs/http-cookies.html
@@ -313,7 +352,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 		format = null;
 	}
 
-	var parsedUrl = url.parse(uri);
+	const parsedUrl = url.parse(uri);
 
 	if (!parsedUrl.protocol || !parsedUrl.hostname) {
 		return callback(new Error('Could not parse URI, format should be http://www.example.com/path/'));
@@ -332,9 +371,9 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
 		db.serialize(function () {
 
-			var cookies = [];
+			let cookies = [];
 
-			var domain = tld.getDomain(uri);
+			const domain = tld.getDomain(uri);
 
 			if (!domain) {
 				return callback(new Error('Could not parse domain from URI, format should be http://www.example.com/path/'));
@@ -344,70 +383,67 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 			// RFC 6265 - Section 5.4, step 2
 			// http://tools.ietf.org/html/rfc6265#section-5.4
 			
-			db.each("SELECT host_key, path, is_secure, expires_utc, name, value, encrypted_value, creation_utc, is_httponly, has_expires, is_persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC", function (err, cookie) {
+			db.each(
+				"SELECT host_key, path, is_secure, expires_utc, name, value, encrypted_value, creation_utc, is_httponly, has_expires, is_persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC",
+				function (err, cookie) {
 
-				var encryptedValue,
-					value;
-
-				if (err) {
-					return callback(err);
-				}
-
-				if (cookie.value === '' && cookie.encrypted_value.length > 0) {
-					encryptedValue = cookie.encrypted_value;
-
-					if (process.platform === 'win32') {
-						if (encryptedValue[0] == 0x01 && encryptedValue[1] == 0x00 && encryptedValue[2] == 0x00 && encryptedValue[3] == 0x00){
-							cookie.value = dpapi.unprotectData(encryptedValue, null, 'CurrentUser').toString('utf-8');
-
-						} else if (encryptedValue[0] == 0x76 && encryptedValue[1] == 0x31 && encryptedValue[2] == 0x30 ){
-							localState = JSON.parse(fs.readFileSync(os.homedir() + '/AppData/Local/Google/Chrome/User Data/Local State'));
-							b64encodedKey = localState.os_crypt.encrypted_key;
-							encryptedKey = new Buffer.from(b64encodedKey,'base64');
-							key = dpapi.unprotectData(encryptedKey.slice(5, encryptedKey.length), null, 'CurrentUser');
-							nonce = encryptedValue.slice(3, 15);
-							tag = encryptedValue.slice(encryptedValue.length - 16, encryptedValue.length);
-							encryptedValue = encryptedValue.slice(15, encryptedValue.length - 16);
-							cookie.value = decryptAES256GCM(key, encryptedValue, nonce, tag).toString('utf-8');
-						}
-					} else {
-						cookie.value = decrypt(derivedKey, encryptedValue);
+					let encryptedValue;
+				
+					if (err) {
+						return callback(err);
 					}
 
-					delete cookie.encrypted_value;
-				}
+					if (cookie.value === '' && cookie.encrypted_value.length > 0) {
+						encryptedValue = cookie.encrypted_value;
 
-				cookies.push(cookie);
+						if (process.platform === 'win32') {
+							if (encryptedValue[0] == 0x01 && encryptedValue[1] == 0x00 && encryptedValue[2] == 0x00 && encryptedValue[3] == 0x00){
+								cookie.value = dpapi.unprotectData(encryptedValue, null, 'CurrentUser').toString('utf-8');
 
-			}, function () {
+							} else if (encryptedValue[0] == 0x76 && encryptedValue[1] == 0x31 && encryptedValue[2] == 0x30 ){
+								localState = JSON.parse(fs.readFileSync(os.homedir() + '/AppData/Local/Google/Chrome/User Data/Local State'));
+								b64encodedKey = localState.os_crypt.encrypted_key;
+								encryptedKey = new Buffer.from(b64encodedKey,'base64');
+								key = dpapi.unprotectData(encryptedKey.slice(5, encryptedKey.length), null, 'CurrentUser');
+								nonce = encryptedValue.slice(3, 15);
+								tag = encryptedValue.slice(encryptedValue.length - 16, encryptedValue.length);
+								encryptedValue = encryptedValue.slice(15, encryptedValue.length - 16);
+								cookie.value = decryptAES256GCM(key, encryptedValue, nonce, tag).toString('utf-8');
+							}
+						} else {
+							cookie.value = decrypt(derivedKey, encryptedValue);
+						}
 
-				var host = parsedUrl.hostname,
+						delete cookie.encrypted_value;
+					}
+
+					cookies.push(cookie);
+				},
+				function () {
+
+				let host = parsedUrl.hostname,
 					path = parsedUrl.path,
-					isSecure = parsedUrl.protocol.match('https'),
-					cookieStore = {},
-					validCookies = [],
-					output;
+					isSecure = parsedUrl.protocol.match('https');
 
-				cookies.forEach(function (cookie) {
+				let validCookies = cookies.filter(function (cookie) {
 
 					if (cookie.is_secure && !isSecure) {
-						return;
+						return false;
 					}
 
 					if (!tough.domainMatch(host, cookie.host_key, true)) {
-						return;
+						return false;
 					}
 
 					if (!tough.pathMatch(path, cookie.path)) {
-						return;
+						return false;
 					}
 
-					validCookies.push(cookie);
-
+					return true;
 				});
 
-				var filteredCookies = [];
-				var keys = {};
+				let filteredCookies = [];
+				let keys = {};
 
 				validCookies.reverse().forEach(function (cookie) {
 
@@ -420,35 +456,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
 				validCookies = filteredCookies.reverse();
 
-				switch (format) {
-
-					case 'curl':
-						output = convertRawToNetscapeCookieFileFormat(validCookies, domain);
-						break;
-
-					case 'jar':
-						output = convertRawToJar(validCookies, uri);
-						break;
-
-					case 'set-cookie':
-						output = convertRawToSetCookieStrings(validCookies);
-						break;
-
-					case 'header':
-						output = convertRawToHeader(validCookies);
-						break;
-
-					case 'puppeteer':
-						output = convertRawToPuppeteerState(validCookies)
-						break;
-
-					case 'object':
-						/* falls through */
-					default:
-						output = convertRawToObject(validCookies);
-						break;
-
-				}
+				const output = getOutput(format, validCookies, domain, uri)
 
 				db.close(function(err) {
 					if (!err) {
