@@ -93,7 +93,7 @@ const setIterations = () => {
 	}
 }
 
-const caterCookies = (profileOrPath) => {
+const caterForCookiesInPath = (profileOrPath) => {
 	const path = profileOrPath;
 	const cookiesFileName = 'Cookies'
 	const includesCookies = path.slice(-cookiesFileName.length) === cookiesFileName
@@ -119,10 +119,10 @@ const caterCookies = (profileOrPath) => {
 const getPath = (profileOrPath) => {
 	if (isPathFormat(profileOrPath)) {
 
-		const path = caterCookies(profileOrPath)
+		const path = caterForCookiesInPath(profileOrPath)
 
 		if (!fs.existsSync(path)) {
-			throw new Error(`Path: ${path} not found on drive`);
+			throw new Error(`Path: ${path} not found`);
 		}
 
 		return path
@@ -163,7 +163,8 @@ function convertChromiumTimestampToUnix(timestamp) {
 
 function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 
-	let out = ''
+	var out = '',
+		cookieLength = cookies.length;
 
 	cookies.forEach(function (cookie, index) {
 
@@ -181,7 +182,7 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 		out += cookie.name + '\t';
 		out += cookie.value + '\t';
 
-		if (cookies.length > index + 1) {
+		if (cookieLength > index + 1) {
 			out += '\n';
 		}
 
@@ -192,12 +193,13 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 
 function convertRawToHeader(cookies) {
 
-	let out = '';
+	var out = '',
+		cookieLength = cookies.length;
 
 	cookies.forEach(function (cookie, index) {
 
 		out += cookie.name + '=' + cookie.value;
-		if (cookies.length > index + 1) {
+		if (cookieLength > index + 1) {
 			out += '; ';
 		}
 
@@ -226,7 +228,8 @@ function convertRawToJar(cookies, uri) {
 
 function convertRawToSetCookieStrings(cookies) {
 
-	let strings = [];
+	var cookieLength = cookies.length,
+		strings = [];
 
 	cookies.forEach(function(cookie) {
 
