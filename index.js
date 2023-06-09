@@ -93,8 +93,7 @@ const setIterations = () => {
 	}
 }
 
-const caterForCookiesInPath = (profileOrPath) => {
-	const path = profileOrPath;
+const caterForCookiesInPath = (path) => {
 	const cookiesFileName = 'Cookies'
 	const includesCookies = path.slice(-cookiesFileName.length) === cookiesFileName
 
