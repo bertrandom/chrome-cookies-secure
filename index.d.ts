@@ -35,7 +35,7 @@ declare module "chrome-cookies-secure" {
   function getCookies(
     url: string, 
     format: "jar", 
-    cb: Callback<any>, 
+    cb: Callback<Record<string, unknown>>, 
     profile?: string
   ): void;
 
@@ -76,7 +76,7 @@ declare module "chrome-cookies-secure" {
     url: string, 
     format: "jar", 
     profile?: string,
-  ): Promise<any>;
+  ): Promise<Record<string, unknown>>;
 
   function getCookiesPromised(
     url: string,
@@ -88,5 +88,5 @@ declare module "chrome-cookies-secure" {
     url: string,
     format: "puppeteer",
     profile?: string
-  ): Promise<PuppeteerCookie>;
+  ): Promise<PuppeteerCookie[]>;
 }
