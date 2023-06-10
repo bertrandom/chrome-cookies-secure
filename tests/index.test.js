@@ -63,28 +63,35 @@ it('Should get puppeteer cookies for the default profile in puppeteer format', a
 
 // Only passes if you alter the customProfile for your local machine
 it('Should get puppeteer cookies for a custom profile in puppeteer format', async () => {
-    const customProfile = 'Profile 2';
+    const customProfile = 'Default';
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customProfile)
     await joi.validate(cookies, puppeteerCookie);
 })
 
 // Only passes if you are on macOS
-it('Should get puppeteer cookies for a path with Cookies on macOS in puppeteer format', async () => {
+xit('Should get puppeteer cookies for a path with /Cookies on macOS in puppeteer format', async () => {
     const customPath = `${process.env.HOME}/Library/Application Support/Google/Chrome/Default/Cookies`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     await joi.validate(cookies, puppeteerCookie);
 })
 
-it('Should get puppeteer cookies for a path without cookies on macOS in puppeteer format', async () => {
+xit('Should get puppeteer cookies for a path without /Cookies on macOS in puppeteer format', async () => {
     const customPath = `${process.env.HOME}/Library/Application Support/Google/Chrome/Default`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     await joi.validate(cookies, puppeteerCookie);
 })
 
 // Only passes if you are on windows
-xit('Should get puppeteer cookies for a path on Windows in puppeteer format', async () => {
+it('Should get puppeteer cookies for a path on Windows in puppeteer format', async () => {
     const WINDOWS_PREFIX = os.homedir();
     const customPath = `${WINDOWS_PREFIX}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Network\\Cookies`;
+    const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
+    await joi.validate(cookies, puppeteerCookie);
+})
+
+it('Should get puppeteer cookies for a path on Windows in puppeteer format', async () => {
+    const WINDOWS_PREFIX = os.homedir();
+    const customPath = `${WINDOWS_PREFIX}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Network`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     await joi.validate(cookies, puppeteerCookie);
 })
