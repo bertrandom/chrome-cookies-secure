@@ -1,7 +1,8 @@
 {
   "name": "chrome-cookies-secure",
-  "version": "2.1.0",
-  "description": "Extract encrypted Google Chrome cookies for a url on a Mac or Linux",
+  "version": "2.1.1",
+  "description": "Extract encrypted Google Chrome cookies for a url on a Mac, Linux or Windows",
+  "types": "index.d.ts",
   "keywords": [
     "google",
     "chrome",
@@ -16,7 +17,7 @@
   "scripts": {
     "test": "mocha tests/index.test.js -t 5000"
   },
-  "author": "Bertrand Fan <bert@bert.org> (https://bert.org/)",
+  "author": "Bertrand Fan <bert@bert.org> (https://bert.org/), Reece Daniels <rubengmurray@gmail.com>",
   "license": "MIT",
   "os": [
     "darwin",
