@@ -162,7 +162,7 @@ function convertChromiumTimestampToUnix(timestamp) {
 
 function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 
-	var out = '',
+	var out = '# Netscape HTTP Cookie File\n',
 		cookieLength = cookies.length;
 
 	cookies.forEach(function (cookie, index) {
@@ -170,20 +170,20 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 		out += cookie.host_key + '\t';
 		out += ((cookie.host_key === '.' + domain) ? 'TRUE' : 'FALSE') + '\t';
 		out += cookie.path + '\t';
-		out += (cookie.is_secure ? 'TRUE' : 'FALSE') + '\t';
+		out += (cookie.is_httponly ? 'TRUE' : 'FALSE') + '\t';
 
 		if (cookie.has_expires) {
 			out += convertChromiumTimestampToUnix(cookie.expires_utc).toString() + '\t';
 		} else {
-			out += '0' + '\t';
+			out += Math.ceil(Date.now()/1000 + 86400 * 360 * 2).toString() + '\t';
 		}
 
 		out += cookie.name + '\t';
-		out += cookie.value + '\t';
+		out += cookie.value + '\n';
 
-		if (cookieLength > index + 1) {
-			out += '\n';
-		}
+		// if (cookieLength > index + 1) {
+		// 	out += '\n';
+		// }
 
 	});
 
