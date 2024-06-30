@@ -15,7 +15,8 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/index.test.js -t 5000"
+    "test": "mocha tests/index.test.js -t 5000",
+    "postinstall": "node ./utils/post-install.js"
   },
   "author": "Bertrand Fan <bert@bert.org> (https://bert.org/), Reece Daniels <rubengmurray@gmail.com>",
   "license": "MIT",
