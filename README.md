@@ -8,6 +8,22 @@ Extract encrypted Google Chrome cookies for a url on Mac OS X, Windows, or Linux
 npm install chrome-cookies-secure
 ```
 
+## Optional Dependencies
+
+Because this package is designed to work cross-platform, two operating system specific dependencies are declared as `optionalDependencies`.
+
+If you are working on these platforms you should install these manually after running `npm i`.
+
+### For Windows
+
+- `win-dpapi` is required
+- `npm i win-dpapi@1.1.0`
+
+### For macOS
+
+- `keytar` is required
+- `npm i keytar@7.9.0`
+
 ## API
 
 getCookies(url[,format],callback,profile)
