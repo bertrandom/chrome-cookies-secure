@@ -46,22 +46,6 @@ If `format` is not specified, `object` will be used as the format by default.
 
 Cookie order tries to follow [RFC 6265 - Section 5.4, step 2](http://tools.ietf.org/html/rfc6265#section-5.4) as best as possible.
 
-## Optional Dependencies
-
-Because this package is designed to work cross-platform, two operating system specific dependencies are declared as `optionalDependencies`.
-
-If you are working on these platforms you should install these manually after running `npm i`.
-
-### For Windows
-
-- `win-dpapi` is required
-- `npm i win-dpapi@1.1.0`
-
-### For macOS
-
-- `keytar` is required
-- `npm i keytar@7.9.0`
-
 ## Examples
 
 basic usage
