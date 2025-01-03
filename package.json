@@ -32,7 +32,7 @@
     "int": "^0.2.0",
     "request": "^2.88.0",
     "sqlite3": "^5.0.7",
-    "tldjs": "^1.5.1",
+    "tldjs": "^2.3.1",
     "tough-cookie": "^2.3.4"
   },
   "optionalDependencies": {
