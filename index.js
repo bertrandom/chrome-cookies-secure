@@ -43,7 +43,7 @@ function decrypt(key, encryptedData) {
 
 	padding = decoded[decoded.length - 1];
 	if (padding) {
-		decoded = decoded.slice(0, decoded.length - padding);
+		decoded = decoded.slice(32, decoded.length - padding);
 	}
 
 	return decoded.toString('utf8');
