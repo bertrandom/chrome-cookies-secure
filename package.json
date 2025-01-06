@@ -33,7 +33,7 @@
     "request": "^2.88.0",
     "sqlite3": "^5.0.7",
     "tldjs": "github:thom4parisot/tld.js",
-    "tough-cookie": "^2.3.4"
+    "tough-cookie": "^5.0.0"
   },
   "optionalDependencies": {
     "keytar": "^7.9.0",
