@@ -5,7 +5,7 @@ Extract encrypted Google Chrome cookies for a url on Mac OS X, Windows, or Linux
 ## Installation
 
 ```
-npm install chrome-cookies-secure
+npm install https://github.com/IskenHuang/chrome-cookies-secure
 ```
 
 ## Optional Dependencies
