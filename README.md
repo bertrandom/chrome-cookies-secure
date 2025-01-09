@@ -36,7 +36,6 @@ getCookies(url[,format],callback,profile)
 format | description
 ------------ | -------------
 curl | [Netscape HTTP Cookie File](http://curl.haxx.se/docs/http-cookies.html) contents usable by curl and wget
-jar | cookie jar compatible with [request](https://www.npmjs.org/package/request)
 set-cookie | Array of Set-Cookie header values
 header | `cookie` header string, similar to what a browser would send
 puppeteer | an array of objects that can be loaded into puppeteer using the `setCookie(...)` method
@@ -56,21 +55,6 @@ const chrome = require('chrome-cookies-secure');
 chrome.getCookies('https://www.example.com/path/', function(err, cookies) {
 	console.log(cookies);
 });
-```
-
-jar used with request
----------------------
-
-```javascript
-const request = require('request');
-const chrome = require('chrome-cookies-secure');
-
-chrome.getCookies('https://www.example.com/', 'jar', function(err, jar) {
-	request({url: 'https://www.example.com/', jar: jar}, function (err, response, body) {
-		console.log(body);
-	});
-});
-
 ```
 
 puppeteer with specific Chrome profile
@@ -94,7 +78,7 @@ const getCookies = (callback) => {
 }
 
 getCookies(async (cookies) => {
-    const browser = await puppeteer.launch({ 
+    const browser = await puppeteer.launch({
         headless: false
     });
     const page = await browser.newPage();
