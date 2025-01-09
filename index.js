@@ -5,9 +5,7 @@
  */
 
 let sqlite3 = require('sqlite3'),
-	tld = require('tldjs'),
 	tough = require('tough-cookie'),
-	request = require('request'),
 	int = require('int'),
 	url = require('url'),
 	crypto = require('crypto'),
@@ -17,15 +15,15 @@ let sqlite3 = require('sqlite3'),
 	ITERATIONS,
 	dbClosed = false;
 
-var	KEYLENGTH = 16,
-	SALT = 'saltysalt'
+const KEYLENGTH = 16
+const SALT = 'saltysalt'
 
 // Decryption based on http://n8henrie.com/2014/05/decrypt-chrome-cookies-with-python/
 // Inspired by https://www.npmjs.org/package/chrome-cookies
 
 function decrypt(key, encryptedData) {
 
-	var decipher,
+	let decipher,
 		decoded,
 		final,
 		padding,
@@ -77,7 +75,7 @@ function getDerivedKey(callback) {
 const pathIdentifiers = ['/', '\\'];
 
 const isPathFormat = (profileOrPath) =>
-	profileOrPath && 
+	profileOrPath &&
 	pathIdentifiers.some(pathIdentifier => profileOrPath.includes(pathIdentifier));
 
 /**
@@ -133,11 +131,11 @@ const getPath = (profileOrPath) => {
 	if (process.platform === 'darwin') {
 		return process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
 	}
-	
+
 	if (process.platform === 'linux') {
 		return process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
 	}
-	
+
 	if (process.platform === 'win32') {
 		const path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
 
@@ -161,9 +159,8 @@ function convertChromiumTimestampToUnix(timestamp) {
 }
 
 function convertRawToNetscapeCookieFileFormat(cookies, domain) {
-
-	var out = '',
-		cookieLength = cookies.length;
+	let out = ''
+	const cookieLength = cookies.length;
 
 	cookies.forEach(function (cookie, index) {
 
@@ -191,9 +188,8 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 }
 
 function convertRawToHeader(cookies) {
-
-	var out = '',
-		cookieLength = cookies.length;
+	let out = ''
+	const cookieLength = cookies.length;
 
 	cookies.forEach(function (cookie, index) {
 
@@ -205,30 +201,10 @@ function convertRawToHeader(cookies) {
 	});
 
 	return out;
-
-}
-
-function convertRawToJar(cookies, uri) {
-
-	let jar = new request.jar();
-
-	cookies.forEach(function (cookie) {
-
-		const jarCookie = request.cookie(cookie.name + '=' + cookie.value);
-		if (jarCookie) {
-			jar.setCookie(jarCookie, uri);
-		}
-
-	});
-
-	return jar;
-
 }
 
 function convertRawToSetCookieStrings(cookies) {
-
-	var cookieLength = cookies.length,
-		strings = [];
+	const strings = [];
 
 	cookies.forEach(function(cookie) {
 
@@ -254,11 +230,10 @@ function convertRawToSetCookieStrings(cookies) {
 	});
 
 	return strings;
-
 }
 
 function convertRawToPuppeteerState(cookies) {
-	
+
 	const puppeteerCookies = cookies.map(function(cookie) {
 		const newCookieObject = {
 			name: cookie.name,
@@ -284,7 +259,7 @@ function convertRawToPuppeteerState(cookies) {
 
 function convertRawToObject(cookies) {
 
-	let out = {};
+	const out = {};
 
 	cookies.forEach(function (cookie) {
 		out[cookie.name] = cookie.value;
@@ -305,27 +280,23 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 
 const getOutput = (format, validCookies, domain, uri) => {
 	switch (format) {
-
-	case 'curl':
-		return convertRawToNetscapeCookieFileFormat(validCookies, domain);
-	case 'jar':
-		return convertRawToJar(validCookies, uri);
-	case 'set-cookie':
-		return convertRawToSetCookieStrings(validCookies);
-	case 'header':
-		return convertRawToHeader(validCookies);
-	case 'puppeteer':
-		return convertRawToPuppeteerState(validCookies)
-	case 'object':
-		/* falls through */
-	default:
-		return convertRawToObject(validCookies);
-}
+		case 'curl':
+			return convertRawToNetscapeCookieFileFormat(validCookies, domain);
+		case 'set-cookie':
+			return convertRawToSetCookieStrings(validCookies);
+		case 'header':
+			return convertRawToHeader(validCookies);
+		case 'puppeteer':
+			return convertRawToPuppeteerState(validCookies)
+		case 'object':
+			/* falls through */
+		default:
+			return convertRawToObject(validCookies);
+	}
 }
 /*
 	Possible formats:
 	curl - Netscape HTTP Cookie File contents usable by curl and wget http://curl.haxx.se/docs/http-cookies.html
-	jar - request module compatible jar https://github.com/request/request#requestjar
 	set-cookie - Array of set-cookie strings
 	header - "cookie" header string
 	puppeteer - array of cookie objects that can be loaded straight into puppeteer setCookie(...)
@@ -333,9 +304,9 @@ const getOutput = (format, validCookies, domain, uri) => {
  */
 
 /**
- * @param {*} uri - the site to retrieve cookies for 
+ * @param {*} uri - the site to retrieve cookies for
  * @param {*} format - the format you want the cookies returned in
- * @param {*} callback - 
+ * @param {*} callback -
  * @param {*} profileOrPath - if empty will use the 'Default' profile in default Chrome location; if specified can be an alternative profile name e.g. 'Profile 1' or an absolute path to an alternative user-data-dir
  */
 const getCookies = async (uri, format, callback, profileOrPath) => {
@@ -375,7 +346,8 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
 			let cookies = [];
 
-			const domain = tld.getDomain(uri);
+			// const domain = tld.getDomain(uri);
+			const domain = parsedUrl.hostname
 
 			if (!domain) {
 				return callback(new Error('Could not parse domain from URI, format should be http://www.example.com/path/'));
@@ -384,13 +356,13 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 			// ORDER BY tries to match sort order specified in
 			// RFC 6265 - Section 5.4, step 2
 			// http://tools.ietf.org/html/rfc6265#section-5.4
-			
+
 			db.each(
 				"SELECT host_key, path, is_secure, expires_utc, name, value, encrypted_value, creation_utc, is_httponly, has_expires, is_persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC",
 				function (err, cookie) {
 
 					let encryptedValue;
-				
+
 					if (err) {
 						return callback(err);
 					}
@@ -477,7 +449,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
 /**
  * Promise wrapper for the main callback function
- * @param {*} uri - the site to retrieve cookies for 
+ * @param {*} uri - the site to retrieve cookies for
  * @param {*} format - the format you want the cookies returned in
  * @param {*} profileOrPath - if empty will use the 'Default' profile in default Chrome location; if specified can be an alternative profile name e.g. 'Profile 1' or an absolute path to an alternative user-data-dir
  */
