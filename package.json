@@ -31,6 +31,7 @@
   "dependencies": {
     "sqlite3": "^5.0.7",
     "int": "^0.2.0",
+    "tldjs": "^2.3.1",
     "tough-cookie": "^5.0.0"
   },
   "optionalDependencies": {
