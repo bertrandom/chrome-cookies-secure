@@ -5,6 +5,7 @@
  */
 
 let sqlite3 = require('sqlite3'),
+	tld = require('tldjs'),
 	tough = require('tough-cookie'),
 	int = require('int'),
 	url = require('url'),
@@ -346,8 +347,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
 			let cookies = [];
 
-			// const domain = tld.getDomain(uri);
-			const domain = parsedUrl.hostname
+			const domain = tld.getDomain(uri);
 
 			if (!domain) {
 				return callback(new Error('Could not parse domain from URI, format should be http://www.example.com/path/'));
