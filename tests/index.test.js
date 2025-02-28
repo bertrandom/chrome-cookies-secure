@@ -20,7 +20,7 @@ const puppeteerCookie = joi
     .min(1)
 
 const url = 'https://www.google.com'
-const isMacos = os.platform === 'darwin'
+const isMacOS = os.platform === 'darwin'
 const isLinux = os.platform === 'linux'
 const isWindows = os.platform === 'windows'
 
@@ -72,31 +72,42 @@ it('Should get puppeteer cookies for a custom profile in puppeteer format', asyn
 })
 
 // Only passes if you are on macOS
-it('Should get puppeteer cookies for a path with /Cookies on macOS in puppeteer format', async () => {
-    if (!isMacos) return false
+it('Should get puppeteer cookies for a path with /Cookies on macOS in puppeteer format', async function () {
+    if (!isMacOS) {
+        this.skip();
+    }
+
     const customPath = `${process.env.HOME}/Library/Application Support/Google/Chrome/Default/Cookies`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     await joi.validate(cookies, puppeteerCookie);
 })
 
-it('Should get puppeteer cookies for a path without /Cookies on macOS in puppeteer format', async () => {
-    if (!isMacos) return false
+it('Should get puppeteer cookies for a path without /Cookies on macOS in puppeteer format', async function () {
+    if (!isMacOS) {
+        this.skip();
+    }
+
     const customPath = `${process.env.HOME}/Library/Application Support/Google/Chrome/Default`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     await joi.validate(cookies, puppeteerCookie);
 })
 
 // Only passes if you are on windows
-it('Should get puppeteer cookies for a path on Windows in puppeteer format', async () => {
-    if (!isWindows) return false
+it('Should get puppeteer cookies for a path on Windows in puppeteer format', async function ()  {
+    if (!isWindows) {
+        this.skip();
+    }   
+     
     const WINDOWS_PREFIX = os.homedir();
     const customPath = `${WINDOWS_PREFIX}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Network\\Cookies`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     await joi.validate(cookies, puppeteerCookie);
 })
 
-it('Should get puppeteer cookies for a path on Windows in puppeteer format', async () => {
-    if (!isWindows) return false
+it('Should get puppeteer cookies for a path on Windows in puppeteer format', async function ()  {
+    if (!isWindows) {
+        this.skip();
+    }   
     const WINDOWS_PREFIX = os.homedir();
     const customPath = `${WINDOWS_PREFIX}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Network`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
@@ -104,8 +115,10 @@ it('Should get puppeteer cookies for a path on Windows in puppeteer format', asy
 })
 
 // Only passes if you are on linux & have Chromium installed
-it('Should getpuppeteer cookies for a path on Linux in puppeteer format', async () => {
-    if (!isLinux) return false
+it('Should getpuppeteer cookies for a path on Linux in puppeteer format', async function () {
+    if (!isLinux) {
+        this.skip();
+    }   
     const customPath = `${process.env.HOME}/.config/chromium/Default/Cookies`;
     const cookies = await chrome.getCookiesPromised(url, 'puppeteer', customPath)
     await joi.validate(cookies, puppeteerCookie);
