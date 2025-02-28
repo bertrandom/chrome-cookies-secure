@@ -203,6 +203,16 @@ function convertRawToHeader(cookies) {
 	return out;
 }
 
+function convertRawToJar(cookies, uri) {
+	const jar = new tough.CookieJar()
+
+	cookies.forEach(({ name, value }) => {
+		jar.setCookieSync(`${name}=${value}`, uri);
+	});
+
+	return { _jar: jar };
+}
+
 function convertRawToSetCookieStrings(cookies) {
 	const strings = [];
 
@@ -282,6 +292,8 @@ const getOutput = (format, validCookies, domain, uri) => {
 	switch (format) {
 		case 'curl':
 			return convertRawToNetscapeCookieFileFormat(validCookies, domain);
+		case 'jar':
+			return convertRawToJar(validCookies, uri);
 		case 'set-cookie':
 			return convertRawToSetCookieStrings(validCookies);
 		case 'header':

@@ -34,7 +34,7 @@ it('Should get curl cookies from the defined url', async () => {
     await joi.validate(cookies, joi.string().required());
 })
 
-xit('Should get jar cookies from the defined url', async () => {
+it('Should get jar cookies from the defined url', async () => {
     const cookies = await chrome.getCookiesPromised(url, 'jar')
     await joi.validate(cookies, joi.object({
         _jar: joi.object({
