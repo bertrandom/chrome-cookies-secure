@@ -8,9 +8,9 @@ const { jarCookie, puppeteerCookie } = require('./schemas/cookies.schemas')
 
 const url = 'https://www.google.com'
 
-const isMacOS = os.platform === 'darwin'
-const isLinux = os.platform === 'linux'
-const isWindows = os.platform === 'windows'
+const isMacOS = process.platform === 'darwin'
+const isLinux = process.platform === 'linux'
+const isWindows = process.platform === 'win32'
 
 it('Should get basic cookies from the defined url', async () => {
     const cookies = await chrome.getCookiesPromised(url)
