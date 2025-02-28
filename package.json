@@ -1,6 +1,6 @@
 {
   "name": "chrome-cookies-secure",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Extract encrypted Google Chrome cookies for a url on a Mac, Linux or Windows",
   "types": "index.d.ts",
   "keywords": [
@@ -29,11 +29,10 @@
     "url": "https://github.com/bertrandom/chrome-cookies-secure.git"
   },
   "dependencies": {
-    "int": "^0.2.0",
-    "request": "^2.88.0",
-    "sqlite3": "^5.0.7",
-    "tldjs": "^1.5.1",
-    "tough-cookie": "^2.3.4"
+    "int": "0.2.0",
+    "sqlite3": "5.1.7",
+    "tldjs": "2.3.1",
+    "tough-cookie": "5.1.2"
   },
   "optionalDependencies": {
     "keytar": "^7.9.0",
