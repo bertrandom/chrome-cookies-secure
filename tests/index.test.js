@@ -1,25 +1,13 @@
 const chrome = require('../index')
 const joi = require('joi')
 const os = require('os')
+const { jarCookie, puppeteerCookie } = require('./schemas/cookies.schemas')
 
 // These tests are not part of a CI / CD
 // To run locally, they assumes you have some cookies for google.com
 
-const puppeteerCookie = joi
-    .array()
-    .items({
-        name: joi.string().required(),
-        value: joi.string().required(),
-        expires: joi.any().required(), // Should be a number but not necessarily a javascript safe one, which causes joi the fail
-        domain: joi.string().required(),
-        path: joi.string().required(),
-        Secure: joi.boolean().optional(),
-        HttpOnly: joi.boolean().optional(),
-    })
-    .required()
-    .min(1)
-
 const url = 'https://www.google.com'
+
 const isMacOS = os.platform === 'darwin'
 const isLinux = os.platform === 'linux'
 const isWindows = os.platform === 'windows'
@@ -36,12 +24,7 @@ it('Should get curl cookies from the defined url', async () => {
 
 it('Should get jar cookies from the defined url', async () => {
     const cookies = await chrome.getCookiesPromised(url, 'jar')
-    await joi.validate(cookies, joi.object({
-        _jar: joi.object({
-            enableLooseMode: joi.boolean(),
-            store: joi.object().unknown(true)
-        }).unknown(true).required(),
-    }).required());
+    await joi.validate(cookies, jarCookie);
 })
 
 it('Should get set-cookie cookies from the defined url', async () => {
