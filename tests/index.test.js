@@ -19,7 +19,6 @@ const puppeteerCookie = joi
     .required()
     .min(1)
 
-// if your chrome doesnt login google. please update the url to a someone logged website
 const url = 'https://www.google.com'
 const isMacos = os.platform === 'darwin'
 const isLinux = os.platform === 'linux'

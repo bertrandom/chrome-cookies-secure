@@ -29,10 +29,10 @@
     "url": "https://github.com/bertrandom/chrome-cookies-secure.git"
   },
   "dependencies": {
-    "sqlite3": "^5.0.7",
-    "int": "^0.2.0",
-    "tldjs": "^2.3.1",
-    "tough-cookie": "^5.0.0"
+    "sqlite3": "5.1.7",
+    "int": "0.2.0",
+    "tldjs": "2.3.1",
+    "tough-cookie": "5.1.2"
   },
   "optionalDependencies": {
     "keytar": "^7.9.0",

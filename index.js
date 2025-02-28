@@ -4,15 +4,16 @@
  * See the accompanying LICENSE file for terms.
  */
 
-let sqlite3 = require('sqlite3'),
-	tld = require('tldjs'),
-	tough = require('tough-cookie'),
-	int = require('int'),
-	url = require('url'),
-	crypto = require('crypto'),
-	os = require('os'),
-	fs = require('fs'),
-	dpapi,
+const sqlite3 = require('sqlite3');
+const tld = require('tldjs');
+const tough = require('tough-cookie');
+const int = require('int');
+const url = require('url');
+const crypto = require('crypto');
+const os = require('os');
+const fs = require('fs');
+
+let dpapi,
 	ITERATIONS,
 	dbClosed = false;
 
@@ -161,7 +162,6 @@ function convertChromiumTimestampToUnix(timestamp) {
 
 function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 	let out = ''
-	const cookieLength = cookies.length;
 
 	cookies.forEach(function (cookie, index) {
 
@@ -179,7 +179,7 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 		out += cookie.name + '\t';
 		out += cookie.value + '\t';
 
-		if (cookieLength > index + 1) {
+		if (cookies.length > index + 1) {
 			out += '\n';
 		}
 
@@ -190,12 +190,11 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
 
 function convertRawToHeader(cookies) {
 	let out = ''
-	const cookieLength = cookies.length;
 
 	cookies.forEach(function (cookie, index) {
 
 		out += cookie.name + '=' + cookie.value;
-		if (cookieLength > index + 1) {
+		if (cookies.length > index + 1) {
 			out += '; ';
 		}
 
@@ -211,7 +210,7 @@ function convertRawToSetCookieStrings(cookies) {
 
 		let out = '';
 
-		let dateExpires = new Date(convertChromiumTimestampToUnix(cookie.expires_utc) * 1000);
+		const dateExpires = new Date(convertChromiumTimestampToUnix(cookie.expires_utc) * 1000);
 
 		out += cookie.name + '=' + cookie.value + '; ';
 		out += 'expires=' + tough.formatDate(dateExpires) + '; ';
@@ -345,7 +344,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
 		db.serialize(function () {
 
-			let cookies = [];
+			const cookies = [];
 
 			const domain = tld.getDomain(uri);
 
@@ -416,8 +415,8 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 					return true;
 				});
 
-				let filteredCookies = [];
-				let keys = {};
+				const filteredCookies = [];
+				const keys = {};
 
 				validCookies.reverse().forEach(function (cookie) {
 
@@ -428,9 +427,9 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
 				});
 
-				validCookies = filteredCookies.reverse();
+				const reversedCookies = filteredCookies.reverse();
 
-				const output = getOutput(format, validCookies, domain, uri)
+				const output = getOutput(format, reversedCookies, domain, uri)
 
 				db.close(function(err) {
 					if (!err) {
