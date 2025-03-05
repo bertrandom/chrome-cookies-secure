@@ -369,7 +369,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 			// http://tools.ietf.org/html/rfc6265#section-5.4
 
 			db.each(
-				"SELECT host_key, path, is_secure, expires_utc, name, value, encrypted_value, creation_utc, is_httponly, has_expires, is_persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC",
+				"SELECT host_key, path, is_secure, expires_utc, name, value, hex(encrypted_value) as encrypted_value, creation_utc, is_httponly, has_expires, is_persistent FROM cookies where host_key like '%" + domain + "' ORDER BY LENGTH(path) DESC, creation_utc ASC",
 				function (err, cookie) {
 
 					let encryptedValue;
@@ -379,7 +379,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 					}
 
 					if (cookie.value === '' && cookie.encrypted_value.length > 0) {
-						encryptedValue = cookie.encrypted_value;
+						encryptedValue = Buffer.from(cookie.encrypted_value, 'hex');
 
 						if (process.platform === 'win32') {
 							if (encryptedValue[0] == 0x01 && encryptedValue[1] == 0x00 && encryptedValue[2] == 0x00 && encryptedValue[3] == 0x00){
