@@ -4,7 +4,7 @@ const puppeteerCookie = joi
     .array()
     .items({
         name: joi.string().required(),
-        value: joi.string().required(),
+        value: joi.string().required().allow(''), // Some Google cookies on Windows return ''. Not all.
         expires: joi.any().required(), // Should be a number but not necessarily a javascript safe one, which causes joi the fail
         domain: joi.string().required(),
         path: joi.string().required(),
