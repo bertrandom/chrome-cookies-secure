@@ -248,7 +248,9 @@ function decryptAES256GCM(key, enc, nonce, tag) {
 
 const getCookies = async (uri, format, callback, profile) => {
 
-	profile ? profile : profile = 'Default'
+	if (!profile) {
+		profile = 'Default';
+	}
 
 	if (process.platform === 'darwin') {
 
