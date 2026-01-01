@@ -2,18 +2,6 @@ name: Test Suite
 
 on: [pull_request]
 
-# jobs:
-#   test:
 jobs:
   test:
     uses: rubengmurray/npm-test-action/.github/workflows/test.yml@feat/callable-workflow
-    # secrets: inherit
-    # runs-on: ubuntu-latest
-    # steps:
-    #   - name: Checkout Code
-    #     uses: actions/checkout@v4
-      
-    #   - name: Run Tests
-    #     uses: rubengmurray/npm-test-action@main
-    #     with:
-    #       test-command: 'test:basic'
