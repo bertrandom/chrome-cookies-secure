@@ -6,7 +6,7 @@ on: [pull_request]
 #   test:
 jobs:
   test:
-    uses: rubengmurray/npm-test-action/action.yml@main
+    uses: rubengmurray/npm-test-action/.github/workflows/test.yml@feat/callable-workflow
     # secrets: inherit
     # runs-on: ubuntu-latest
     # steps:
