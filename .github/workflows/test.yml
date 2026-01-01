@@ -4,4 +4,7 @@ on: [pull_request]
 
 jobs:
   test:
-    uses: rubengmurray/npm-test-action/.github/workflows/test.yml@feat/callable-workflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rubengmurray/npm-test-action/.github/workflows/test.yml@feat/callable-workflow
