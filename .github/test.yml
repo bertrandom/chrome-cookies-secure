@@ -1,0 +1,15 @@
+name: Test Suite
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Run Tests
+        uses: rubengmurray/npm-test-action@main
+        with:
+          test-command: 'test:basic'
