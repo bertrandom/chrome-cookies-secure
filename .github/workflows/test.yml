@@ -1,10 +1,22 @@
-name: Test Suite
+# name: Test Suite
+
+# on: [pull_request]
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: rubengmurray/npm-test-action/.github/workflows/test.yml@feat/callable-workflow
+
+
+name: CI Tests
 
 on: [pull_request]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: rubengmurray/npm-test-action/.github/workflows/test.yml@feat/callable-workflow
+  # You call the shared workflow here as a job
+  run-tests:
+    uses: rubengmurray/npm-test-action/.github/workflows/test.yml@main
+    with:
+      test-command: 'test:ci'
