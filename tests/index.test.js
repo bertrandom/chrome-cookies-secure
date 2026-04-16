@@ -5,7 +5,6 @@ const { jarCookie, puppeteerCookie } = require('./schemas/cookies.schemas')
 
 // These tests are not part of a CI / CD
 // To run locally, they assumes you have some cookies for google.com
-
 const url = 'https://www.google.com'
 
 const isMacOS = process.platform === 'darwin'
