@@ -2,5 +2,5 @@
 node_modules/
 npm-debug.log
 .wakatime-project
-.chrome-profile
+.chrome*
 test-results
