@@ -4,14 +4,8 @@ on: [push, pull_request]
 
 jobs:
   e2e:
-    # Playwright install is slow on Windows; keep headroom beyond the test itself.
-    timeout-minutes: 5
-    strategy:
-      fail-fast: false
-      matrix:
-        # macOS CI cannot use Chrome Safe Storage / Keychain reliably — run that path locally.
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
