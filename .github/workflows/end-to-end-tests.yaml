@@ -4,16 +4,16 @@ on: [push, pull_request]
 
 jobs:
   e2e:
+    # Job-level skip → GitHub shows "Skipped".
+    # Chrome Safe Storage / Keychain is not available on macOS runners.
+    # Windows: Playwright Chromium hangs in CI.
+    if: ${{ matrix.os != 'macos-latest' && matrix.os != 'windows-latest' }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    # Skipped jobs show as Skipped in Actions.
-    # macOS: Chrome Safe Storage / Keychain unavailable on runners.
-    # Windows: Playwright Chromium hangs in CI (see tests/windows-e2e).
-    if: matrix.os == 'ubuntu-latest'
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
