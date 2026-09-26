@@ -13,7 +13,5 @@ jobs:
           node-version: 22.18.0
           cache: npm
       - run: npm ci
-      - name: Install Playwright for e2e
-        run: npm install --no-save playwright@1.61.1 @playwright/test@1.61.1
       - run: npx playwright install chromium --with-deps
       - run: npm run test:e2e

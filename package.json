@@ -40,9 +40,11 @@
     "win-dpapi": "1.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@types/joi": "14.3.1",
     "joi": "14.3.1",
-    "mocha": "8.4.0"
+    "mocha": "8.4.0",
+    "playwright": "1.61.1"
   },
   "engines": {
     "node": ">=12.18.4"
