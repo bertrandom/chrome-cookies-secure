@@ -2,11 +2,27 @@
 
 Extract encrypted Google Chrome cookies for a url on Mac OS X, Windows, or Linux
 
+`@latest`
+
+[![Socket Badge](https://badge.socket.dev/npm/package/chrome-cookies-secure/latest)](https://socket.dev/npm/package/chrome-cookies-secure/overview/latest)
+
+`@canary`
+
+[![Socket Badge](https://badge.socket.dev/npm/package/chrome-cookies-secure/canary)](https://socket.dev/npm/package/chrome-cookies-secure/overview/canary)
+
 ## Installation
 
 ```
 npm install chrome-cookies-secure
+# or
+npm install chrome-cookies-secure@canary
 ```
+
+##### Canary Version (Sept 2026)
+
+- Due to lack of test coverage on Linux & Windows, latest security bumps have been released on `@canary`.
+- Beware there may be instability in this release, but that it comes at the benefit of better security.
+- Please raise issues for any bugs you find on the [open PR](https://github.com/bertrandom/chrome-cookies-secure/pull/77/changes) page or open a PR for the `@canary` tag.
 
 ## Optional Dependencies
 
@@ -14,12 +30,12 @@ Because this package is designed to work cross-platform, two operating system sp
 
 If you are working on these platforms you should install these manually after running `npm i`.
 
-### For Windows
+#### For Windows
 
 - `win-dpapi` is required
 - `npm i win-dpapi@1.1.0`
 
-### For macOS
+#### For macOS
 
 - `keytar` is required
 - `npm i keytar@7.9.0`

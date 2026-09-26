@@ -16,7 +16,7 @@ describe('chrome-cookies-secure E2E Tests', function () {
   // Keep Mocha above Playwright's launch timeout so we see browser errors, not a generic Mocha timeout.
   this.timeout(process.platform === 'win32' ? 45000 : 10000);
 
-  let userDataDir;
+  let userDataDir: string;
 
   before(function () {
     userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ccs-e2e-'));

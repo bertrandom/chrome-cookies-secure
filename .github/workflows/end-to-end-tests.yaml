@@ -1,17 +1,14 @@
-name: E2E Matrix Test
+name: E2E Tests
 
 on: [push, pull_request]
 
 jobs:
   e2e:
-    # Job-level skip → GitHub shows "Skipped" (not a green check). Mocha this.skip() still exits 0.
-    # Chrome Safe Storage / Keychain is not available on macOS runners.
-    if: matrix.os != 'macos-latest'
-    timeout-minutes: 10
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +17,5 @@ jobs:
           node-version: 22.18.0
           cache: npm
       - run: npm ci
-      # Linux needs Playwright's Chromium + OS deps. Windows uses preinstalled Chrome via channel: 'chrome'.
-      - name: Install Playwright Chromium
-        if: runner.os == 'Linux'
-        run: npx playwright install chromium --with-deps
+      - run: npx playwright install chromium --with-deps
       - run: npm run test:e2e
