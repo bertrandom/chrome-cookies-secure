@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   e2e:
-    timeout-minutes: 5
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:

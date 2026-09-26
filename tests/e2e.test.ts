@@ -8,6 +8,7 @@ import chromeCookies from '../index.js';
 
 const COOKIE_NAME = 'test_secure_cookie';
 const COOKIE_VALUE = 'super-secret-123';
+const USER_DATA_DIR = path.join(process.cwd(), '.chrome-profile');
 
 // A dummy domain that satisfies tld.getDomain() perfectly
 const FAKE_URL = 'https://www.testcookies.com';
@@ -19,6 +20,8 @@ describe('chrome-cookies-secure E2E Tests', function () {
   let userDataDir: string;
 
   before(function () {
+    // Drop any profile written with Playwright's mock keychain defaults
+    fs.rmSync(USER_DATA_DIR, { recursive: true, force: true });
     userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ccs-e2e-'));
   });
 
