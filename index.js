@@ -12,6 +12,7 @@ const url = require('url');
 const crypto = require('crypto');
 const os = require('os');
 const fs = require('fs');
+const path = require('path');
 
 let dpapi,
 	ITERATIONS,
@@ -93,60 +94,61 @@ const setIterations = () => {
 	}
 }
 
-const caterForCookiesInPath = (path) => {
-	const cookiesFileName = 'Cookies'
-	const includesCookies = path.slice(-cookiesFileName.length) === cookiesFileName
-
-	if (includesCookies) {
-		return path;
+/**
+ * Resolve a Cookies SQLite path from either a Cookies file path or a profile directory.
+ * Modern Chromium stores cookies under profile/Network/Cookies; older builds used profile/Cookies.
+ */
+const resolveCookiesPath = (profileOrCookiesPath) => {
+	if (path.basename(profileOrCookiesPath) === 'Cookies') {
+		return profileOrCookiesPath;
 	}
 
-	if (process.platform === 'darwin' || process.platform === 'linux') {
-		return path.concat(`/${cookiesFileName}`)
+	const candidates = [
+		path.join(profileOrCookiesPath, 'Network', 'Cookies'),
+		path.join(profileOrCookiesPath, 'Cookies'),
+	];
+
+	const existing = candidates.find((candidate) => fs.existsSync(candidate));
+	if (existing) {
+		return existing;
 	}
 
-	if (process.platform === 'win32') {
-		return path.concat(`\\${cookiesFileName}`)
-	}
+	throw new Error(`Path: ${candidates.join(' or ')} not found`);
+};
 
-	return path
-}
+/**
+ * Local State lives in the user-data dir (parent of the profile dir).
+ * Cookies may be at <profile>/Cookies or <profile>/Network/Cookies.
+ */
+const getLocalStatePath = (cookiesPath) => {
+	let profileDir = path.dirname(cookiesPath);
+	if (path.basename(profileDir) === 'Network') {
+		profileDir = path.dirname(profileDir);
+	}
+	return path.join(path.dirname(profileDir), 'Local State');
+};
 
 /**
  * Converts profileOrPath argument into a path
  */
 const getPath = (profileOrPath) => {
 	if (isPathFormat(profileOrPath)) {
-
-		const path = caterForCookiesInPath(profileOrPath)
-
-		if (!fs.existsSync(path)) {
-			throw new Error(`Path: ${path} not found`);
-		}
-
-		return path
+		return resolveCookiesPath(profileOrPath);
 	}
 
 	const defaultProfile = 'Default';
 	const profile = profileOrPath || defaultProfile;
 
 	if (process.platform === 'darwin') {
-		return process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
+		return resolveCookiesPath(process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}`);
 	}
 
 	if (process.platform === 'linux') {
-		return process.env.HOME + `/.config/google-chrome/${profile}/Cookies`;
+		return resolveCookiesPath(process.env.HOME + `/.config/google-chrome/${profile}`);
 	}
 
 	if (process.platform === 'win32') {
-		const path = os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Network\\Cookies`;
-
-		// Windows has two potential locations
-		if (fs.existsSync(path)) {
-			return path;
-		}
-
-		return os.homedir() + `\\AppData\\Local\\Google\\Chrome\\User Data\\${profile}\\Cookies`;
+		return resolveCookiesPath(path.join(os.homedir(), 'AppData', 'Local', 'Google', 'Chrome', 'User Data', profile));
 	}
 
 	return new Error('Only Mac, Windows, and Linux are supported.');
@@ -323,14 +325,14 @@ const getOutput = (format, validCookies, domain, uri) => {
  */
 const getCookies = async (uri, format, callback, profileOrPath) => {
 	setIterations();
-	const path = getPath(profileOrPath);
+	const cookiesPath = getPath(profileOrPath);
 
-	if (path instanceof Error) {
-		const error = path;
+	if (cookiesPath instanceof Error) {
+		const error = cookiesPath;
 		return callback(error);
 	}
 
-	db = new sqlite3.Database(path);
+	db = new sqlite3.Database(cookiesPath);
 
 	if (format instanceof Function) {
 		callback = format;
@@ -344,7 +346,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 	}
 
 	if (dbClosed) {
-		db = new sqlite3.Database(path);
+		db = new sqlite3.Database(cookiesPath);
 		dbClosed = false;
 	}
 
@@ -386,12 +388,13 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 								cookie.value = dpapi.unprotectData(encryptedValue, null, 'CurrentUser').toString('utf-8');
 
 							} else if (encryptedValue[0] == 0x76 && encryptedValue[1] == 0x31 && encryptedValue[2] == 0x30 ){
-								localState = JSON.parse(fs.readFileSync(os.homedir() + '/AppData/Local/Google/Chrome/User Data/Local State'));
-								b64encodedKey = localState.os_crypt.encrypted_key;
-								encryptedKey = new Buffer.from(b64encodedKey,'base64');
-								key = dpapi.unprotectData(encryptedKey.slice(5, encryptedKey.length), null, 'CurrentUser');
-								nonce = encryptedValue.slice(3, 15);
-								tag = encryptedValue.slice(encryptedValue.length - 16, encryptedValue.length);
+								// Key comes from this profile's Local State (not always the default Chrome install)
+								const localState = JSON.parse(fs.readFileSync(getLocalStatePath(cookiesPath), 'utf8'));
+								const b64encodedKey = localState.os_crypt.encrypted_key;
+								const encryptedKey = Buffer.from(b64encodedKey, 'base64');
+								const key = dpapi.unprotectData(encryptedKey.slice(5, encryptedKey.length), null, 'CurrentUser');
+								const nonce = encryptedValue.slice(3, 15);
+								const tag = encryptedValue.slice(encryptedValue.length - 16, encryptedValue.length);
 								encryptedValue = encryptedValue.slice(15, encryptedValue.length - 16);
 								cookie.value = decryptAES256GCM(key, encryptedValue, nonce, tag).toString('utf-8');
 							}
@@ -407,7 +410,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 				function () {
 
 				let host = parsedUrl.hostname,
-					path = parsedUrl.path,
+					requestPath = parsedUrl.path,
 					isSecure = parsedUrl.protocol.match('https');
 
 				let validCookies = cookies.filter(function (cookie) {
@@ -420,7 +423,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 						return false;
 					}
 
-					if (!tough.pathMatch(path, cookie.path)) {
+					if (!tough.pathMatch(requestPath, cookie.path)) {
 						return false;
 					}
 
