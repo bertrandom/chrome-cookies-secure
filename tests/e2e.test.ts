@@ -56,7 +56,9 @@ describe('chrome-cookies-secure E2E Tests', function () {
         status: 200,
         headers: {
           // Drop a secure cookie into the browser session
-          'Set-Cookie': `${COOKIE_NAME}=${COOKIE_VALUE}; Secure; HttpOnly; Path=/`,
+          // Max-Age is required so Chromium persists the cookie to the Cookies SQLite DB.
+          // Session cookies (no expiry) stay in-memory only and never appear in the DB.
+          'Set-Cookie': `${COOKIE_NAME}=${COOKIE_VALUE}; Secure; HttpOnly; Path=/; Max-Age=3600`,
           'Content-Type': 'text/html',
         },
         body: '<h1>Mock Environment Loaded</h1>'
