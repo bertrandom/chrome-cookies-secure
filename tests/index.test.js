@@ -74,6 +74,11 @@ it('Should get puppeteer cookies for a path without /Cookies on macOS in puppete
     await joi.validate(cookies, puppeteerCookie);
 })
 
+// docker run --rm -it \
+//   -v "$PWD":/app -w /app \
+//   mcr.microsoft.com/playwright:v1.61.1-jammy \
+//   bash -lc 'npm ci && npm run test:e2e'
+
 // Only passes if you are on windows
 it('Should get puppeteer cookies for a path on Windows in puppeteer format', async function ()  {
     if (!isWindows) {
