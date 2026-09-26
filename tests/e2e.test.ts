@@ -32,8 +32,8 @@ const withTimeout = async <T>(promise: Promise<T>, ms: number, label: string): P
 };
 
 describe('chrome-cookies-secure E2E Tests', function () {
-  // Keep Mocha above the slowest Playwright step so we surface real errors, not a generic Mocha timeout.
-  this.timeout(process.platform === 'win32' ? 90000 : 10000);
+  // Keep Mocha above Playwright's launch timeout so we see browser errors, not a generic Mocha timeout.
+  this.timeout(process.platform === 'win32' ? 30000 : 10000);
 
   let userDataDir: string;
 
@@ -93,7 +93,7 @@ describe('chrome-cookies-secure E2E Tests', function () {
     log('browser launched');
 
     try {
-      const page = context.pages()[0] || (await context.newPage());
+      const page = await context.newPage();
 
       // Intercept network requests to the fake domain entirely in-memory
       await page.route('**/*', async (route) => {
@@ -114,13 +114,19 @@ describe('chrome-cookies-secure E2E Tests', function () {
       log('goto complete');
     } finally {
       log('closing browser');
-      await withTimeout(context.close(), 15000, 'context.close()').catch((err) => {
-        log(`close warning: ${(err as Error).message}`);
-      });
+      // Always close so the Cookies SQLite DB is flushed / unlocked
+      await context.close();
       log('browser closed');
     }
 
-    log('decrypting cookies');
+    log('getting cookies');
+
+    // Give the Windows Network Service time to release handles and flush WAL
+    // Basic delay to test how long the lock might be.
+    if (process.platform === 'win32') {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+    }
+
     const cookies = await chromeCookies.getCookiesPromised(
       FAKE_URL,
       'object',
