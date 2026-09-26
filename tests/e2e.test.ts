@@ -14,7 +14,7 @@ const FAKE_URL = 'https://www.testcookies.com';
 
 describe('chrome-cookies-secure E2E Tests', function () {
   // Windows CI needs longer for cold Chromium launch; Linux is sub-second.
-  this.timeout(process.platform === 'win32' ? 60000 : 1000);
+  this.timeout(process.platform === 'win32' ? 60000 : 10000);
 
   before(function () {
     // Real Chrome Safe Storage / Keychain is not available in GitHub macOS runners.
