@@ -3,7 +3,7 @@ name: E2E Tests
 on: [push, pull_request]
 
 jobs:
-  e2e-ubuntu:
+  e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -15,16 +15,3 @@ jobs:
       - run: npm ci
       - run: npx playwright install chromium --with-deps
       - run: npm run test:e2e
-
-  # Placeholders so the OS shows as Skipped in Actions.
-  e2e-macos:
-    runs-on: macos-latest
-    if: false
-    steps:
-      - run: echo "Skipped: Chrome Safe Storage / Keychain unavailable on macOS runners"
-
-  e2e-windows:
-    runs-on: windows-latest
-    if: false
-    steps:
-      - run: echo "Skipped: Windows e2e tracked on tests/windows-e2e"
