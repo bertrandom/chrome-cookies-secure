@@ -15,7 +15,8 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/index.test.js -t 5000"
+    "test": "mocha tests/index.test.js -t 5000",
+    "test:e2e": "mocha tests/e2e.test.ts"
   },
   "author": "Bertrand Fan <bert@bert.org> (https://bert.org/), Reece Daniels <rubengmurray@gmail.com>",
   "license": "MIT",
@@ -39,9 +40,11 @@
     "win-dpapi": "1.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@types/joi": "14.3.1",
     "joi": "14.3.1",
-    "mocha": "8.4.0"
+    "mocha": "8.4.0",
+    "playwright": "1.61.1"
   },
   "engines": {
     "node": ">=20.12.0"
