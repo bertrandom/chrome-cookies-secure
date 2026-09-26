@@ -13,9 +13,27 @@ const USER_DATA_DIR = path.join(process.cwd(), '.chrome-profile');
 // A dummy domain that satisfies tld.getDomain() perfectly
 const FAKE_URL = 'https://www.testcookies.com';
 
+const log = (msg: string) => {
+  console.log(`[e2e] ${msg}`);
+};
+
+const withTimeout = async <T>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+};
+
 describe('chrome-cookies-secure E2E Tests', function () {
-  // Keep Mocha above Playwright's launch timeout so we see browser errors, not a generic Mocha timeout.
-  this.timeout(process.platform === 'win32' ? 45000 : 10000);
+  // Keep Mocha above the slowest Playwright step so we surface real errors, not a generic Mocha timeout.
+  this.timeout(process.platform === 'win32' ? 90000 : 10000);
 
   let userDataDir: string;
 
@@ -27,7 +45,12 @@ describe('chrome-cookies-secure E2E Tests', function () {
 
   after(function () {
     if (userDataDir && fs.existsSync(userDataDir)) {
-      fs.rmSync(userDataDir, { recursive: true, force: true });
+      try {
+        fs.rmSync(userDataDir, { recursive: true, force: true });
+      } catch (err) {
+        // Windows may still hold SQLite locks briefly after Chromium exits.
+        log(`cleanup warning: ${(err as Error).message}`);
+      }
     }
   });
 
@@ -35,8 +58,8 @@ describe('chrome-cookies-secure E2E Tests', function () {
     // Playwright defaults to --use-mock-keychain and --password-store=basic.
     // On macOS this package decrypts via the real "Chrome Safe Storage" keychain entry, so we must opt out.
     // On Linux the package always derives the key from the hardcoded basic-store password, so keep Playwright's defaults.
-    // On Windows use the runner/system Chrome (DPAPI + this profile's Local State). Playwright's
-    // bundled Chromium often hangs on launch under GitHub windows-latest.
+    // On Windows use Playwright's bundled Chromium (DPAPI + this profile's Local State). 
+    // System Chrome via channel: 'chrome' hung silently on windows-latest without respecting Playwright's launch timeout.
     const launchOptions = {
       headless: true,
       timeout: 30000,
@@ -48,16 +71,29 @@ describe('chrome-cookies-secure E2E Tests', function () {
         : {}),
       ...(process.platform === 'win32'
         ? {
-            channel: 'chrome',
-            args: ['--disable-gpu', '--no-first-run', '--no-default-browser-check'],
+            args: [
+              '--disable-gpu',
+              '--disable-extensions',
+              '--disable-background-networking',
+              '--disable-sync',
+              '--disable-default-apps',
+              '--no-first-run',
+              '--no-default-browser-check',
+            ],
           }
         : {}),
     };
 
-    const context = await chromium.launchPersistentContext(userDataDir, launchOptions);
+    log(`launching persistent context (${process.platform}) dir=${userDataDir}`);
+    const context = await withTimeout(
+      chromium.launchPersistentContext(userDataDir, launchOptions),
+      35000,
+      'launchPersistentContext'
+    );
+    log('browser launched');
 
     try {
-      const page = await context.newPage();
+      const page = context.pages()[0] || (await context.newPage());
 
       // Intercept network requests to the fake domain entirely in-memory
       await page.route('**/*', async (route) => {
@@ -73,12 +109,18 @@ describe('chrome-cookies-secure E2E Tests', function () {
         });
       });
 
-      await page.goto(FAKE_URL, { timeout: 15000 });
+      log(`goto ${FAKE_URL}`);
+      await page.goto(FAKE_URL, { timeout: 15000, waitUntil: 'domcontentloaded' });
+      log('goto complete');
     } finally {
-      // Always close so the Cookies SQLite DB is flushed / unlocked
-      await context.close();
+      log('closing browser');
+      await withTimeout(context.close(), 15000, 'context.close()').catch((err) => {
+        log(`close warning: ${(err as Error).message}`);
+      });
+      log('browser closed');
     }
 
+    log('decrypting cookies');
     const cookies = await chromeCookies.getCookiesPromised(
       FAKE_URL,
       'object',
