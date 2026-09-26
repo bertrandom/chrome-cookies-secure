@@ -16,7 +16,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha tests/index.test.js -t 5000",
-    "test:e2e": "mocha tests/e2e.test.ts -t 60000"
+    "test:e2e": "mocha tests/e2e.test.ts"
   },
   "author": "Bertrand Fan <bert@bert.org> (https://bert.org/), Reece Daniels <rubengmurray@gmail.com>",
   "license": "MIT",

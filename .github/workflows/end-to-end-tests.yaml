@@ -4,7 +4,11 @@ on: [push, pull_request]
 
 jobs:
   e2e:
-    timeout-minutes: 10
+    # Job-level skip → GitHub shows "Skipped" for unsupported OS.
+    # macOS: Chrome Safe Storage / Keychain unavailable on runners.
+    # Windows: Playwright Chromium hangs in CI.
+    if: matrix.os == 'ubuntu-latest'
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:

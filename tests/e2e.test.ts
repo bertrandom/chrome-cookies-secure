@@ -13,15 +13,9 @@ const USER_DATA_DIR = path.join(process.cwd(), '.chrome-profile');
 const FAKE_URL = 'https://www.testcookies.com';
 
 describe('chrome-cookies-secure E2E Tests', function () {
-  // Windows CI needs longer for cold Chromium launch; Linux is sub-second.
-  this.timeout(process.platform === 'win32' ? 60000 : 10000);
+  this.timeout(10000);
 
   before(function () {
-    // Real Chrome Safe Storage / Keychain is not available in GitHub macOS runners.
-    if (process.platform === 'darwin' && process.env.CI) {
-      this.skip();
-    }
-
     // Drop any profile written with Playwright's mock keychain defaults
     fs.rmSync(USER_DATA_DIR, { recursive: true, force: true });
   });
@@ -30,7 +24,6 @@ describe('chrome-cookies-secure E2E Tests', function () {
     // Playwright defaults to --use-mock-keychain and --password-store=basic.
     // On macOS this package decrypts via the real "Chrome Safe Storage" keychain entry, so we must opt out.
     // On Linux the package always derives the key from the hardcoded basic-store password, so keep Playwright's defaults.
-    // On Windows Chromium uses DPAPI against this user-data-dir's Local State — same defaults are fine.
     const launchOptions = {
       headless: true,
       ...(process.platform === 'darwin'
