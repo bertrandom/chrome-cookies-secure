@@ -1,6 +1,0 @@
----
-alwaysApply: true
----
-
-rules:
-  - name: Simplicity.
