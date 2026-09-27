@@ -24,14 +24,17 @@ describe('chrome-cookies-secure E2E Tests', function () {
     // Playwright defaults to --use-mock-keychain and --password-store=basic.
     // On macOS this package decrypts via the real "Chrome Safe Storage" keychain entry, so we must opt out.
     // On Linux the package always derives the key from the hardcoded basic-store password, so keep Playwright's defaults.
+    // CHROME_PATH (CI) points at a system Chrome/Chromium install instead of Playwright's bundled browser.
     const launchOptions = {
       headless: true,
-      ...(process.platform === 'darwin'
-        ? {
-            channel: 'chrome',
-            ignoreDefaultArgs: ['--use-mock-keychain', '--password-store=basic'],
-          }
-        : {}),
+      ...(process.env.CHROME_PATH
+        ? { executablePath: process.env.CHROME_PATH }
+        : process.platform === 'darwin'
+          ? {
+              channel: 'chrome',
+              ignoreDefaultArgs: ['--use-mock-keychain', '--password-store=basic'],
+            }
+          : {}),
     };
 
     const context = await chromium.launchPersistentContext(USER_DATA_DIR, launchOptions);
