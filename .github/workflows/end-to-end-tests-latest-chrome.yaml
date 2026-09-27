@@ -1,0 +1,29 @@
+name: E2E Tests (Latest Chrome)
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Mondays 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  e2e-latest-chrome:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: npm
+      - run: npm ci
+      - uses: browser-actions/setup-chrome@v2
+        id: setup-chrome
+        with:
+          chrome-version: stable
+      - run: npx playwright install-deps chromium
+      - run: npm run test:e2e
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
