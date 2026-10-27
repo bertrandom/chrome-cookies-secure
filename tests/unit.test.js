@@ -3,15 +3,14 @@ const crypto = require('crypto')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
-const sqlite3 = require('sqlite3')
 const chrome = require('../index')
+const { createCookiesDb } = require('./sqlite')
 
 // Runs against a fixture Cookies database, so no browser is needed.
 // Key derivation still goes through the platform (keychain / DPAPI); on Linux the key is fixed, which is what CI uses.
 const isLinux = process.platform === 'linux'
 
 const url = 'https://www.example.com/'
-const EXPIRES_UTC = 13344473600000000 // Chromium timestamp for 2023-11-14T22:13:20Z (unix 1700000000)
 
 const rows = [
     // host_key, path, is_secure, is_httponly, name, value, encrypted_value
@@ -29,19 +28,6 @@ const encryptLinuxV10 = (hostKey, value) => {
     const plaintext = Buffer.concat([crypto.createHash('sha256').update(hostKey).digest(), Buffer.from(value)])
     return Buffer.concat([Buffer.from('v10'), cipher.update(plaintext), cipher.final()])
 }
-
-const createCookiesDb = (file, cookieRows) => new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(file)
-    db.serialize(() => {
-        db.run('CREATE TABLE cookies (host_key TEXT, path TEXT, is_secure INTEGER, expires_utc INTEGER, name TEXT, value TEXT, encrypted_value BLOB, creation_utc INTEGER, is_httponly INTEGER, has_expires INTEGER, is_persistent INTEGER)')
-        const insert = db.prepare('INSERT INTO cookies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1)')
-        cookieRows.forEach(([hostKey, cookiePath, isSecure, isHttpOnly, name, value, encryptedValue], index) => {
-            insert.run(hostKey, cookiePath, isSecure, EXPIRES_UTC, name, value, encryptedValue || Buffer.alloc(0), index + 1, isHttpOnly)
-        })
-        insert.finalize()
-    })
-    db.close((err) => (err ? reject(err) : resolve()))
-})
 
 describe('chrome-cookies-secure unit tests', function () {
     let profileDir
