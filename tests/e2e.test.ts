@@ -1,8 +1,8 @@
 import 'mocha';
+import { chromium } from '@playwright/test';
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
-import { chromium } from '@playwright/test';
 import chromeCookies from '../index.js';
 
 const COOKIE_NAME = 'test_secure_cookie';
@@ -12,10 +12,10 @@ const USER_DATA_DIR = path.join(process.cwd(), '.chrome-profile');
 // A dummy domain that satisfies tld.getDomain() perfectly
 const FAKE_URL = 'https://www.testcookies.com';
 
-describe('chrome-cookies-secure E2E Tests', function () {
+describe('chrome-cookies-secure E2E Tests', function() {
   this.timeout(10000);
 
-  before(function () {
+  before(function() {
     // Drop any profile written with Playwright's mock keychain defaults
     fs.rmSync(USER_DATA_DIR, { recursive: true, force: true });
   });
@@ -30,11 +30,11 @@ describe('chrome-cookies-secure E2E Tests', function () {
       ...(process.env.CHROME_PATH
         ? { executablePath: process.env.CHROME_PATH }
         : process.platform === 'darwin'
-          ? {
-              channel: 'chrome',
-              ignoreDefaultArgs: ['--use-mock-keychain', '--password-store=basic'],
-            }
-          : {}),
+        ? {
+          channel: 'chrome',
+          ignoreDefaultArgs: ['--use-mock-keychain', '--password-store=basic'],
+        }
+        : {}),
     };
 
     const context = await chromium.launchPersistentContext(USER_DATA_DIR, launchOptions);
@@ -63,7 +63,7 @@ describe('chrome-cookies-secure E2E Tests', function () {
     const cookies = await chromeCookies.getCookiesPromised(
       FAKE_URL,
       'object',
-      path.join(USER_DATA_DIR, 'Default')
+      path.join(USER_DATA_DIR, 'Default'),
     );
 
     console.log(cookies);
@@ -72,7 +72,7 @@ describe('chrome-cookies-secure E2E Tests', function () {
     assert.strictEqual(
       cookies[COOKIE_NAME],
       COOKIE_VALUE,
-      `Expected cookie "${COOKIE_NAME}" to equal "${COOKIE_VALUE}"`
+      `Expected cookie "${COOKIE_NAME}" to equal "${COOKIE_VALUE}"`,
     );
   });
 });

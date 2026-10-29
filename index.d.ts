@@ -1,4 +1,4 @@
-declare module "chrome-cookies-secure" {
+declare module 'chrome-cookies-secure' {
   type PuppeteerCookie = {
     name: string;
     value: string;
@@ -11,7 +11,7 @@ declare module "chrome-cookies-secure" {
 
   type Callback<T> = (err: Error, cookies: T) => void;
 
-  type CookieFormat = 'object' | 'curl' | 'header' | 'jar' | 'set-cookie' | 'puppeteer'
+  type CookieFormat = 'object' | 'curl' | 'header' | 'jar' | 'set-cookie' | 'puppeteer';
 
   /**
    * getCookies
@@ -20,73 +20,73 @@ declare module "chrome-cookies-secure" {
 
   function getCookies(
     url: string,
-    format: "object",
+    format: 'object',
     cb: Callback<Record<string, string>>,
-    profile?: string
+    profile?: string,
   ): void;
 
   function getCookies(
     url: string,
-    format: "curl" | "header",
+    format: 'curl' | 'header',
     cb: Callback<string>,
-    profile?: string
-  ): void;
-
-  function getCookies(
-    url: string, 
-    format: "jar", 
-    cb: Callback<Record<string, unknown>>, 
-    profile?: string
+    profile?: string,
   ): void;
 
   function getCookies(
     url: string,
-    format: "set-cookie",
+    format: 'jar',
+    cb: Callback<Record<string, unknown>>,
+    profile?: string,
+  ): void;
+
+  function getCookies(
+    url: string,
+    format: 'set-cookie',
     cb: Callback<string[]>,
-    profile?: string
+    profile?: string,
   ): void;
 
   function getCookies(
     url: string,
-    format: "puppeteer",
+    format: 'puppeteer',
     cb: Callback<PuppeteerCookie[]>,
-    profile?: string
+    profile?: string,
   ): void;
 
   /**
    * getCookiesPromised
    */
   function getCookiesPromised(
-    url: string
+    url: string,
   ): Promise<Record<string, string>>;
 
   function getCookiesPromised(
     url: string,
-    format: "object",
-    profile?: string
+    format: 'object',
+    profile?: string,
   ): Promise<Record<string, string>>;
 
   function getCookiesPromised(
     url: string,
-    format: "curl" | "header",
-    profile?: string
+    format: 'curl' | 'header',
+    profile?: string,
   ): Promise<string>;
 
   function getCookiesPromised(
-    url: string, 
-    format: "jar", 
+    url: string,
+    format: 'jar',
     profile?: string,
   ): Promise<Record<string, unknown>>;
 
   function getCookiesPromised(
     url: string,
-    format: "set-cookie",
-    profile?: string
+    format: 'set-cookie',
+    profile?: string,
   ): Promise<string[]>;
 
   function getCookiesPromised(
     url: string,
-    format: "puppeteer",
-    profile?: string
+    format: 'puppeteer',
+    profile?: string,
   ): Promise<PuppeteerCookie[]>;
 }
