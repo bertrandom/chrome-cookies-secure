@@ -18,7 +18,8 @@
     "dprint:format": "dprint fmt --config dprint.json --config-discovery=ignore-descendants",
     "prepare": "husky install",
     "test": "mocha tests/index.test.js -t 5000",
-    "test:e2e": "mocha tests/e2e.test.ts"
+    "test:e2e": "mocha tests/e2e.test.ts",
+    "test:unit": "mocha tests/unit.test.js"
   },
   "author": "Bertrand Fan <bert@bert.org> (https://bert.org/), Reece Daniels <rubengmurray@gmail.com>",
   "license": "MIT",
