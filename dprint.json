@@ -1,0 +1,19 @@
+{
+  "includes": [
+    "**/*.{js,ts}"
+  ],
+  "lineWidth": 120,
+  "incremental": true,
+  "typescript": {
+    "quoteStyle": "alwaysSingle",
+    "semiColons": "always",
+    "indentWidth": 2,
+    "useTabs": false,
+
+    "memberExpression.linePerExpression": false,
+    "arrowFunction.useParentheses": "maintain"
+  },
+  "plugins": [
+    "${configDir}/node_modules/@dprint/typescript/plugin.wasm"
+  ]
+}
