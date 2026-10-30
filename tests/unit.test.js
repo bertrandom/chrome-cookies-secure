@@ -110,6 +110,57 @@ describe('chrome-cookies-secure unit tests', function() {
     await assert.rejects(chrome.getCookiesPromised('not a url', 'object', cookiesPath), /Could not parse URI/);
   });
 
+  it('rejects when the profile path does not exist', async () => {
+    await assert.rejects(
+      chrome.getCookiesPromised(url, 'object', path.join(profileDir, 'missing', 'Cookies')),
+      /not found/,
+    );
+  });
+
+  it('passes a missing profile path error to the callback', (done) => {
+    chrome.getCookies(url, 'object', (err) => {
+      assert.ok(err instanceof Error);
+      done();
+    }, path.join(profileDir, 'missing', 'Cookies'));
+  });
+
+  it('returns each profile its own cookies when called concurrently', async () => {
+    const otherDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-cookies-secure-'));
+    const otherPath = path.join(otherDir, 'Cookies');
+    await createCookiesDb(otherPath, [['.example.com', '/', 0, 0, 'other_profile', 'o1', null]]);
+
+    try {
+      const [first, second] = await Promise.all([
+        chrome.getCookiesPromised(url, 'object', cookiesPath),
+        chrome.getCookiesPromised(url, 'object', otherPath),
+      ]);
+      assert.deepStrictEqual(first, { plain: 'p1', secure_only: 's1' });
+      assert.deepStrictEqual(second, { other_profile: 'o1' });
+    } finally {
+      fs.rmSync(otherDir, { recursive: true, force: true });
+    }
+  });
+
+  it('closes the database after each call', async function() {
+    // Lists this process's open files; Linux only
+    if (!fs.existsSync('/proc/self/fd')) {
+      this.skip();
+    }
+
+    await chrome.getCookiesPromised(url, 'object', cookiesPath);
+    await chrome.getCookiesPromised(url, 'object', cookiesPath);
+
+    const realCookiesPath = fs.realpathSync(cookiesPath);
+    const openHandles = fs.readdirSync('/proc/self/fd').filter((fd) => {
+      try {
+        return fs.readlinkSync(`/proc/self/fd/${fd}`) === realCookiesPath;
+      } catch (err) {
+        return false;
+      }
+    });
+    assert.strictEqual(openHandles.length, 0);
+  });
+
   it('decrypts Linux v10 encrypted cookies', async function() {
     if (!isLinux) {
       this.skip();
