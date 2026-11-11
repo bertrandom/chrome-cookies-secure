@@ -120,6 +120,7 @@ describe('chrome-cookies-secure unit tests', function() {
   it('passes a missing profile path error to the callback', (done) => {
     chrome.getCookies(url, 'object', (err) => {
       assert.ok(err instanceof Error);
+      assert.match(err.message, /not found/);
       done();
     }, path.join(profileDir, 'missing', 'Cookies'));
   });
