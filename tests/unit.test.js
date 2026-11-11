@@ -110,6 +110,19 @@ describe('chrome-cookies-secure unit tests', function() {
     await assert.rejects(chrome.getCookiesPromised('not a url', 'object', cookiesPath), /Could not parse URI/);
   });
 
+  it('returns a cookie named like an Object.prototype member', async () => {
+    const namesDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-cookies-secure-'));
+    const namesPath = path.join(namesDir, 'Cookies');
+    await createCookiesDb(namesPath, [['.example.com', '/', 0, 0, 'constructor', 'c1', null]]);
+
+    try {
+      const cookies = await chrome.getCookiesPromised(url, 'header', namesPath);
+      assert.strictEqual(cookies, 'constructor=c1');
+    } finally {
+      fs.rmSync(namesDir, { recursive: true, force: true });
+    }
+  });
+
   it('decrypts Linux v10 encrypted cookies', async function() {
     if (!isLinux) {
       this.skip();
