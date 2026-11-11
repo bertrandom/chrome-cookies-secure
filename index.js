@@ -207,10 +207,13 @@ function convertRawToSetCookieStrings(cookies) {
   cookies.forEach(function(cookie) {
     let out = '';
 
-    const dateExpires = new Date(convertChromiumTimestampToUnix(cookie.expires_utc) * 1000);
-
     out += cookie.name + '=' + cookie.value + '; ';
-    out += 'expires=' + tough.formatDate(dateExpires) + '; ';
+
+    if (cookie.has_expires) {
+      const dateExpires = new Date(convertChromiumTimestampToUnix(cookie.expires_utc) * 1000);
+      out += 'expires=' + tough.formatDate(dateExpires) + '; ';
+    }
+
     out += 'domain=' + cookie.host_key + '; ';
     out += 'path=' + cookie.path;
 

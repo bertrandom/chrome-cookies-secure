@@ -10,18 +10,20 @@ const createCookiesDb = (file, cookieRows) =>
       db.run(
         'CREATE TABLE cookies (host_key TEXT, path TEXT, is_secure INTEGER, expires_utc INTEGER, name TEXT, value TEXT, encrypted_value BLOB, creation_utc INTEGER, is_httponly INTEGER, has_expires INTEGER, is_persistent INTEGER)',
       );
-      const insert = db.prepare('INSERT INTO cookies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1)');
-      cookieRows.forEach(([hostKey, cookiePath, isSecure, isHttpOnly, name, value, encryptedValue], index) => {
+      const insert = db.prepare('INSERT INTO cookies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
+      cookieRows.forEach((row, index) => {
+        const [hostKey, cookiePath, isSecure, isHttpOnly, name, value, encryptedValue, hasExpires = 1] = row;
         insert.run(
           hostKey,
           cookiePath,
           isSecure,
-          EXPIRES_UTC,
+          hasExpires ? EXPIRES_UTC : 0,
           name,
           value,
           encryptedValue || Buffer.alloc(0),
           index + 1,
           isHttpOnly,
+          hasExpires,
         );
       });
       insert.finalize();
