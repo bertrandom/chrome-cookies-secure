@@ -168,7 +168,7 @@ function convertRawToNetscapeCookieFileFormat(cookies, domain) {
     }
 
     out += cookie.name + '\t';
-    out += cookie.value + '\t';
+    out += cookie.value;
 
     if (cookies.length > index + 1) {
       out += '\n';
