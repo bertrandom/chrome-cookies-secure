@@ -70,7 +70,7 @@ describe('chrome-cookies-secure unit tests', function() {
 
   it('returns Netscape cookie file lines for curl', async () => {
     const cookies = await chrome.getCookiesPromised(url, 'curl', cookiesPath);
-    const lines = cookies.split('\n').map((line) => line.split('\t').slice(0, 7));
+    const lines = cookies.split('\n').map((line) => line.split('\t'));
     assert.deepStrictEqual(lines, [
       ['.example.com', 'TRUE', '/', 'FALSE', '1700000000', 'plain', 'p1'],
       ['.example.com', 'TRUE', '/', 'TRUE', '1700000000', 'secure_only', 's1'],
