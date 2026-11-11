@@ -23,7 +23,7 @@ const SALT = 'saltysalt';
 // Decryption based on http://n8henrie.com/2014/05/decrypt-chrome-cookies-with-python/
 // Inspired by https://www.npmjs.org/package/chrome-cookies
 
-function decrypt(key, encryptedData) {
+function decrypt(key, encryptedData, hostKey) {
   let decipher,
     decoded,
     final,
@@ -42,7 +42,9 @@ function decrypt(key, encryptedData) {
 
   padding = decoded[decoded.length - 1];
   if (padding) {
-    decoded = decoded.slice(32, decoded.length - padding);
+    // Chrome 130+ stores SHA-256(host_key) before the value; rows written by older versions have no prefix
+    const hasHostHash = decoded.slice(0, 32).equals(crypto.createHash('sha256').update(hostKey).digest());
+    decoded = decoded.slice(hasHostHash ? 32 : 0, decoded.length - padding);
   }
 
   return decoded.toString('utf8');
@@ -381,7 +383,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
                 cookie.value = decryptAES256GCM(key, encryptedValue, nonce, tag).toString('utf-8');
               }
             } else {
-              cookie.value = decrypt(derivedKey, encryptedValue);
+              cookie.value = decrypt(derivedKey, encryptedValue, cookie.host_key);
             }
 
             delete cookie.encrypted_value;

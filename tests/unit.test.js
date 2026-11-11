@@ -22,10 +22,11 @@ const rows = [
 
 // Linux Chrome "v10" encryption: AES-128-CBC, key from the fixed password 'peanuts',
 // plaintext prefixed with the SHA-256 of host_key (Chrome 130+)
-const encryptLinuxV10 = (hostKey, value) => {
+const encryptLinuxV10 = (hostKey, value, hostHash = true) => {
   const key = crypto.pbkdf2Sync('peanuts', 'saltysalt', 1, 16, 'sha1');
   const cipher = crypto.createCipheriv('aes-128-cbc', key, Buffer.alloc(16, ' '));
-  const plaintext = Buffer.concat([crypto.createHash('sha256').update(hostKey).digest(), Buffer.from(value)]);
+  const prefix = hostHash ? crypto.createHash('sha256').update(hostKey).digest() : Buffer.alloc(0);
+  const plaintext = Buffer.concat([prefix, Buffer.from(value)]);
   return Buffer.concat([Buffer.from('v10'), cipher.update(plaintext), cipher.final()]);
 };
 
@@ -126,6 +127,25 @@ describe('chrome-cookies-secure unit tests', function() {
       assert.deepStrictEqual(cookies, { encrypted: 'secret-value' });
     } finally {
       fs.rmSync(encryptedDir, { recursive: true, force: true });
+    }
+  });
+
+  it('decrypts Linux v10 cookies stored without the host_key hash (before Chrome 130)', async function() {
+    if (!isLinux) {
+      this.skip();
+    }
+
+    const legacyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-cookies-secure-'));
+    const legacyPath = path.join(legacyDir, 'Cookies');
+    await createCookiesDb(legacyPath, [
+      ['.example.com', '/', 0, 0, 'legacy', '', encryptLinuxV10('.example.com', 'legacy-value', false)],
+    ]);
+
+    try {
+      const cookies = await chrome.getCookiesPromised(url, 'object', legacyPath);
+      assert.deepStrictEqual(cookies, { legacy: 'legacy-value' });
+    } finally {
+      fs.rmSync(legacyDir, { recursive: true, force: true });
     }
   });
 });
