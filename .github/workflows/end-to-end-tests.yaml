@@ -12,6 +12,6 @@ jobs:
         with:
           node-version: 22.18.0
           cache: npm
-      - run: npm ci
+      - run: npm i
       - run: npx playwright install chromium --with-deps
       - run: npm run test:e2e
