@@ -110,6 +110,22 @@ describe('chrome-cookies-secure unit tests', function() {
     await assert.rejects(chrome.getCookiesPromised('not a url', 'object', cookiesPath), /Could not parse URI/);
   });
 
+  it('sets the curl subdomain flag for a cookie scoped to a subdomain', async () => {
+    const subdomainDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-cookies-secure-'));
+    const subdomainPath = path.join(subdomainDir, 'Cookies');
+    await createCookiesDb(subdomainPath, [['.www.example.com', '/', 0, 0, 'sub', 's1', null]]);
+
+    try {
+      const cookies = await chrome.getCookiesPromised(url, 'curl', subdomainPath);
+      assert.deepStrictEqual(
+        cookies.split('\t').slice(0, 7),
+        ['.www.example.com', 'TRUE', '/', 'FALSE', '1700000000', 'sub', 's1'],
+      );
+    } finally {
+      fs.rmSync(subdomainDir, { recursive: true, force: true });
+    }
+  });
+
   it('decrypts Linux v10 encrypted cookies', async function() {
     if (!isLinux) {
       this.skip();
