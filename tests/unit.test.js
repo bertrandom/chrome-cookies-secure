@@ -13,7 +13,7 @@ const isLinux = process.platform === 'linux';
 const url = 'https://www.example.com/';
 
 const rows = [
-  // host_key, path, is_secure, is_httponly, name, value, encrypted_value
+  // host_key, path, is_secure, is_httponly, name, value, encrypted_value[, has_expires]
   ['.example.com', '/', 0, 0, 'plain', 'p1', null],
   ['.example.com', '/', 1, 1, 'secure_only', 's1', null],
   ['.example.com', '/account', 0, 0, 'account', 'acc', null],
@@ -108,6 +108,19 @@ describe('chrome-cookies-secure unit tests', function() {
 
   it('rejects urls it cannot parse', async () => {
     await assert.rejects(chrome.getCookiesPromised('not a url', 'object', cookiesPath), /Could not parse URI/);
+  });
+
+  it('omits expires from set-cookie strings for session cookies', async () => {
+    const sessionDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-cookies-secure-'));
+    const sessionPath = path.join(sessionDir, 'Cookies');
+    await createCookiesDb(sessionPath, [['.example.com', '/', 0, 0, 'session', 's1', null, 0]]);
+
+    try {
+      const cookies = await chrome.getCookiesPromised(url, 'set-cookie', sessionPath);
+      assert.deepStrictEqual(cookies, ['session=s1; domain=.example.com; path=/']);
+    } finally {
+      fs.rmSync(sessionDir, { recursive: true, force: true });
+    }
   });
 
   it('decrypts Linux v10 encrypted cookies', async function() {
