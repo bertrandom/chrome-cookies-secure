@@ -391,7 +391,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
         },
         function() {
           let host = parsedUrl.hostname,
-            path = parsedUrl.path,
+            path = parsedUrl.pathname,
             isSecure = parsedUrl.protocol.match('https');
 
           let validCookies = cookies.filter(function(cookie) {
