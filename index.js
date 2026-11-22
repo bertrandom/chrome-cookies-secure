@@ -152,12 +152,12 @@ function convertChromiumTimestampToUnix(timestamp) {
   return int(timestamp.toString()).sub('11644473600000000').div(1000000);
 }
 
-function convertRawToNetscapeCookieFileFormat(cookies, domain) {
+function convertRawToNetscapeCookieFileFormat(cookies) {
   let out = '';
 
   cookies.forEach(function(cookie, index) {
     out += cookie.host_key + '\t';
-    out += ((cookie.host_key === '.' + domain) ? 'TRUE' : 'FALSE') + '\t';
+    out += (cookie.host_key.startsWith('.') ? 'TRUE' : 'FALSE') + '\t';
     out += cookie.path + '\t';
     out += (cookie.is_secure ? 'TRUE' : 'FALSE') + '\t';
 
@@ -271,10 +271,10 @@ function decryptAES256GCM(key, enc, nonce, tag) {
   return str;
 }
 
-const getOutput = (format, validCookies, domain, uri) => {
+const getOutput = (format, validCookies, uri) => {
   switch (format) {
     case 'curl':
-      return convertRawToNetscapeCookieFileFormat(validCookies, domain);
+      return convertRawToNetscapeCookieFileFormat(validCookies);
     case 'jar':
       return convertRawToJar(validCookies, uri);
     case 'set-cookie':
@@ -422,7 +422,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
           const reversedCookies = filteredCookies.reverse();
 
-          const output = getOutput(format, reversedCookies, domain, uri);
+          const output = getOutput(format, reversedCookies, uri);
 
           db.close(function(err) {
             if (!err) {
