@@ -411,7 +411,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
           });
 
           const filteredCookies = [];
-          const keys = {};
+          const keys = Object.create(null);
 
           validCookies.reverse().forEach(function(cookie) {
             if (typeof keys[cookie.name] === 'undefined') {
