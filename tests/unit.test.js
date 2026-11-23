@@ -58,6 +58,11 @@ describe('chrome-cookies-secure unit tests', function() {
     assert.strictEqual(cookies, 'account=acc; plain=p1; secure_only=s1');
   });
 
+  it('matches path-scoped cookies when the url has a query string', async () => {
+    const cookies = await chrome.getCookiesPromised('https://www.example.com/account?tab=1', 'header', cookiesPath);
+    assert.strictEqual(cookies, 'account=acc; plain=p1; secure_only=s1');
+  });
+
   it('accepts a profile directory instead of the Cookies file', async () => {
     const cookies = await chrome.getCookiesPromised(url, 'object', profileDir);
     assert.deepStrictEqual(cookies, { plain: 'p1', secure_only: 's1' });
