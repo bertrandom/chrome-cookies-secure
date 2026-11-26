@@ -14,8 +14,7 @@ const os = require('os');
 const fs = require('fs');
 
 let dpapi,
-  ITERATIONS,
-  dbClosed = false;
+  ITERATIONS;
 
 const KEYLENGTH = 16;
 const SALT = 'saltysalt';
@@ -56,12 +55,13 @@ function getDerivedKey(callback) {
     keytar = require('keytar');
     keytar.getPassword('Chrome Safe Storage', 'Chrome').then(function(chromePassword) {
       crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
-    });
+    }).catch(callback);
   } else if (process.platform === 'linux') {
     chromePassword = 'peanuts';
     crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
   } else if (process.platform === 'win32') {
     // On Windows, the crypto is managed entirely by the OS.  We never see the keys.
+    // win-dpapi is an optional dependency, so this may throw if it did not install (#57)
     dpapi = require('win-dpapi');
     callback(null, null);
   }
@@ -304,31 +304,39 @@ const getOutput = (format, validCookies, domain, uri) => {
  * @param {*} callback -
  * @param {*} profileOrPath - if empty will use the 'Default' profile in default Chrome location; if specified can be an alternative profile name e.g. 'Profile 1' or an absolute path to an alternative user-data-dir
  */
-const getCookies = async (uri, format, callback, profileOrPath) => {
-  setIterations();
-  const path = getPath(profileOrPath);
-
-  if (path instanceof Error) {
-    const error = path;
-    return callback(error);
-  }
-
-  db = new sqlite3.Database(path);
-
+const getCookies = (uri, format, callback, profileOrPath) => {
   if (format instanceof Function) {
     callback = format;
     format = null;
   }
 
+  // Anything thrown while setting up goes to the callback; errors from later async steps arrive through their own callbacks
+  try {
+    readCookies(uri, format, callback, profileOrPath);
+  } catch (err) {
+    callback(err);
+  }
+};
+
+const readCookies = (uri, format, callback, profileOrPath) => {
+  setIterations();
+
+  const cookiesPath = getPath(profileOrPath);
   const parsedUrl = url.parse(uri);
+
+  if (cookiesPath instanceof Error) {
+    const error = cookiesPath;
+    return callback(error);
+  }
 
   if (!parsedUrl.protocol || !parsedUrl.hostname) {
     return callback(new Error('Could not parse URI, format should be http://www.example.com/path/'));
   }
 
-  if (dbClosed) {
-    db = new sqlite3.Database(path);
-    dbClosed = false;
+  const domain = tld.getDomain(uri);
+
+  if (!domain) {
+    return callback(new Error('Could not parse domain from URI, format should be http://www.example.com/path/'));
   }
 
   getDerivedKey(function(err, derivedKey) {
@@ -336,14 +344,11 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
       return callback(err);
     }
 
+    // Opened per call and closed below, so concurrent calls never share or leak a handle
+    const db = new sqlite3.Database(cookiesPath);
+
     db.serialize(function() {
       const cookies = [];
-
-      const domain = tld.getDomain(uri);
-
-      if (!domain) {
-        return callback(new Error('Could not parse domain from URI, format should be http://www.example.com/path/'));
-      }
 
       // ORDER BY tries to match sort order specified in
       // RFC 6265 - Section 5.4, step 2
@@ -424,10 +429,7 @@ const getCookies = async (uri, format, callback, profileOrPath) => {
 
           const output = getOutput(format, reversedCookies, domain, uri);
 
-          db.close(function(err) {
-            if (!err) {
-              dbClosed = true;
-            }
+          db.close(function() {
             return callback(null, output);
           });
         },
