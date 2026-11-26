@@ -125,6 +125,21 @@ describe('chrome-cookies-secure unit tests', function() {
     }, path.join(profileDir, 'missing', 'Cookies'));
   });
 
+  it('passes any error thrown while reading to the callback', (done) => {
+    const tld = require('tldjs');
+    const original = tld.getDomain;
+    tld.getDomain = () => {
+      throw new Error('boom');
+    };
+
+    chrome.getCookies(url, 'object', (err) => {
+      tld.getDomain = original;
+      assert.ok(err instanceof Error);
+      assert.strictEqual(err.message, 'boom');
+      done();
+    }, cookiesPath);
+  });
+
   it('returns each profile its own cookies when called concurrently', async () => {
     const otherDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chrome-cookies-secure-'));
     const otherPath = path.join(otherDir, 'Cookies');

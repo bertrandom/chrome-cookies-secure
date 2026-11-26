@@ -52,11 +52,7 @@ function getDerivedKey(callback) {
     chromePassword;
 
   if (process.platform === 'darwin') {
-    try {
-      keytar = require('keytar');
-    } catch (err) {
-      return callback(err);
-    }
+    keytar = require('keytar');
     keytar.getPassword('Chrome Safe Storage', 'Chrome').then(function(chromePassword) {
       crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
     }).catch(callback);
@@ -65,12 +61,8 @@ function getDerivedKey(callback) {
     crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
   } else if (process.platform === 'win32') {
     // On Windows, the crypto is managed entirely by the OS.  We never see the keys.
-    try {
-      dpapi = require('win-dpapi');
-    } catch (err) {
-      // win-dpapi is an optional dependency, so it may not have installed (#57)
-      return callback(err);
-    }
+    // win-dpapi is an optional dependency, so this may throw if it did not install (#57)
+    dpapi = require('win-dpapi');
     callback(null, null);
   }
 }
@@ -312,24 +304,25 @@ const getOutput = (format, validCookies, domain, uri) => {
  * @param {*} callback -
  * @param {*} profileOrPath - if empty will use the 'Default' profile in default Chrome location; if specified can be an alternative profile name e.g. 'Profile 1' or an absolute path to an alternative user-data-dir
  */
-const getCookies = async (uri, format, callback, profileOrPath) => {
+const getCookies = (uri, format, callback, profileOrPath) => {
   if (format instanceof Function) {
     callback = format;
     format = null;
   }
 
+  // Anything thrown while setting up goes to the callback; errors from later async steps arrive through their own callbacks
+  try {
+    readCookies(uri, format, callback, profileOrPath);
+  } catch (err) {
+    callback(err);
+  }
+};
+
+const readCookies = (uri, format, callback, profileOrPath) => {
   setIterations();
 
-  let cookiesPath,
-    parsedUrl;
-
-  // A throw here would only reject the promise returned by this async function, which nobody awaits
-  try {
-    cookiesPath = getPath(profileOrPath);
-    parsedUrl = url.parse(uri);
-  } catch (err) {
-    return callback(err);
-  }
+  const cookiesPath = getPath(profileOrPath);
+  const parsedUrl = url.parse(uri);
 
   if (cookiesPath instanceof Error) {
     const error = cookiesPath;
